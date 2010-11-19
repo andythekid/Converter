@@ -1,0 +1,434 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <author>Andrey Volkov</author>
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>800</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="windowTitle">
+   <string>Конвертер</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="icons.qrc">
+    <normaloff>:/icons/table_48.png</normaloff>:/icons/table_48.png</iconset>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout_2">
+    <item>
+     <widget class="QGroupBox" name="groupBox">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="title">
+       <string>Фильтр</string>
+      </property>
+      <layout class="QGridLayout" name="gridLayout">
+       <item row="0" column="0">
+        <layout class="QVBoxLayout" name="verticalLayout">
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout">
+           <item>
+            <widget class="QLabel" name="lblFIO">
+             <property name="text">
+              <string>Ф.И.О.</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="lnEditFIO"/>
+           </item>
+           <item>
+            <widget class="QLabel" name="lblGodRojd">
+             <property name="text">
+              <string>Год рождения   От:</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="lnEditGodOt"/>
+           </item>
+           <item>
+            <widget class="QLabel" name="lblDoGod">
+             <property name="text">
+              <string>До:</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="lnEditGodDo"/>
+           </item>
+           <item>
+            <widget class="QLabel" name="lblSex">
+             <property name="text">
+              <string>Пол: </string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QComboBox" name="cmbSex">
+             <item>
+              <property name="text">
+               <string>муж.</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>жен.</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>ж.б.</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_2">
+           <item>
+            <widget class="QLabel" name="lblDate">
+             <property name="text">
+              <string>Дата съема   От:</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QDateEdit" name="dateBegin"/>
+           </item>
+           <item>
+            <widget class="QLabel" name="lblDo">
+             <property name="text">
+              <string>До:</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QDateEdit" name="dateEnd"/>
+           </item>
+           <item>
+            <widget class="QLabel" name="lblOpis">
+             <property name="text">
+              <string>Описание</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="lnEditOpis"/>
+           </item>
+           <item>
+            <widget class="QPushButton" name="btnClear">
+             <property name="text">
+              <string>Очистить</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="btnSearch">
+             <property name="font">
+              <font>
+               <weight>75</weight>
+               <bold>true</bold>
+              </font>
+             </property>
+             <property name="text">
+              <string>Поиск</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </item>
+      </layout>
+      <zorder></zorder>
+     </widget>
+    </item>
+    <item>
+     <widget class="QSplitter" name="splitter">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <widget class="QTreeWidget" name="trePatients">
+       <property name="alternatingRowColors">
+        <bool>true</bool>
+       </property>
+       <property name="rootIsDecorated">
+        <bool>false</bool>
+       </property>
+       <property name="uniformRowHeights">
+        <bool>true</bool>
+       </property>
+       <property name="sortingEnabled">
+        <bool>true</bool>
+       </property>
+       <property name="allColumnsShowFocus">
+        <bool>true</bool>
+       </property>
+       <property name="columnCount">
+        <number>4</number>
+       </property>
+       <column>
+        <property name="text">
+         <string>№</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Ф.И.О</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Дата рождения</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Пол</string>
+        </property>
+       </column>
+      </widget>
+      <widget class="QTreeWidget" name="treProbes">
+       <property name="alternatingRowColors">
+        <bool>true</bool>
+       </property>
+       <property name="rootIsDecorated">
+        <bool>false</bool>
+       </property>
+       <property name="uniformRowHeights">
+        <bool>true</bool>
+       </property>
+       <property name="sortingEnabled">
+        <bool>true</bool>
+       </property>
+       <property name="allColumnsShowFocus">
+        <bool>true</bool>
+       </property>
+       <column>
+        <property name="text">
+         <string>Дата съема</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Описание</string>
+        </property>
+       </column>
+      </widget>
+      <widget class="QGraphicsView" name="graphicsView"/>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>800</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menu">
+    <property name="title">
+     <string>Файл</string>
+    </property>
+    <addaction name="actionDBOpen"/>
+    <addaction name="actionDBClose"/>
+    <addaction name="actSelrctAll"/>
+    <addaction name="actionExport"/>
+    <addaction name="separator"/>
+    <addaction name="actionExit"/>
+   </widget>
+   <widget class="QMenu" name="menu_2">
+    <property name="title">
+     <string>Вид</string>
+    </property>
+    <addaction name="actMainToolBarVis"/>
+    <addaction name="action"/>
+   </widget>
+   <widget class="QMenu" name="menu_4">
+    <property name="title">
+     <string>Справка</string>
+    </property>
+    <addaction name="actHelpShow"/>
+    <addaction name="separator"/>
+    <addaction name="actAboutShow"/>
+   </widget>
+   <widget class="QMenu" name="menu_3">
+    <property name="title">
+     <string>Инструменты</string>
+    </property>
+    <widget class="QMenu" name="menu_5">
+     <property name="title">
+      <string>Нормализация</string>
+     </property>
+     <addaction name="action_4"/>
+     <addaction name="action_1"/>
+    </widget>
+    <addaction name="menu_5"/>
+    <addaction name="action_3"/>
+   </widget>
+   <addaction name="menu"/>
+   <addaction name="menu_2"/>
+   <addaction name="menu_3"/>
+   <addaction name="menu_4"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <widget class="QToolBar" name="toolBarMain">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>34</width>
+     <height>34</height>
+    </size>
+   </property>
+   <property name="toolButtonStyle">
+    <enum>Qt::ToolButtonTextBesideIcon</enum>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionDBOpen"/>
+   <addaction name="actSelrctAll"/>
+   <addaction name="actionExport"/>
+   <addaction name="actionDBClose"/>
+   <addaction name="actionExit"/>
+  </widget>
+  <action name="actionDBOpen">
+   <property name="icon">
+    <iconset resource="icons.qrc">
+     <normaloff>:/icons/database_add_48.png</normaloff>:/icons/database_add_48.png</iconset>
+   </property>
+   <property name="text">
+    <string>Открыть БД</string>
+   </property>
+  </action>
+  <action name="actionDBClose">
+   <property name="icon">
+    <iconset resource="icons.qrc">
+     <normaloff>:/icons/database_remove_48.png</normaloff>:/icons/database_remove_48.png</iconset>
+   </property>
+   <property name="text">
+    <string>Закрыть БД</string>
+   </property>
+  </action>
+  <action name="actionExport">
+   <property name="icon">
+    <iconset resource="icons.qrc">
+     <normaloff>:/icons/box_upload_48.png</normaloff>:/icons/box_upload_48.png</iconset>
+   </property>
+   <property name="text">
+    <string>Экспорт</string>
+   </property>
+  </action>
+  <action name="actMainToolBarVis">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Главная</string>
+   </property>
+  </action>
+  <action name="actHelpShow">
+   <property name="icon">
+    <iconset resource="icons.qrc">
+     <normaloff>:/icons/warning_48.png</normaloff>:/icons/warning_48.png</iconset>
+   </property>
+   <property name="text">
+    <string>Содержание</string>
+   </property>
+  </action>
+  <action name="actAboutShow">
+   <property name="icon">
+    <iconset resource="icons.qrc">
+     <normaloff>:/icons/table_48.png</normaloff>:/icons/table_48.png</iconset>
+   </property>
+   <property name="text">
+    <string>О программе</string>
+   </property>
+  </action>
+  <action name="actionExit">
+   <property name="icon">
+    <iconset resource="icons.qrc">
+     <normaloff>:/icons/cross_48.png</normaloff>:/icons/cross_48.png</iconset>
+   </property>
+   <property name="text">
+    <string>Выход</string>
+   </property>
+   <property name="toolTip">
+    <string>Закрыть программу</string>
+   </property>
+  </action>
+  <action name="actSelrctAll">
+   <property name="icon">
+    <iconset resource="icons.qrc">
+     <normaloff>:/icons/add_48.png</normaloff>:/icons/add_48.png</iconset>
+   </property>
+   <property name="text">
+    <string>Выбрать все</string>
+   </property>
+  </action>
+  <action name="action">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Инструменты</string>
+   </property>
+  </action>
+  <action name="action_3">
+   <property name="text">
+    <string>Индекс напряжения</string>
+   </property>
+  </action>
+  <action name="action_4">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Без нормализации</string>
+   </property>
+  </action>
+  <action name="action_1">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Нормализация 1</string>
+   </property>
+  </action>
+ </widget>
+ <resources>
+  <include location="icons.qrc"/>
+ </resources>
+ <connections/>
+</ui>

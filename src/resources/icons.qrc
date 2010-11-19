@@ -1,0 +1,16 @@
+<RCC>
+  <qresource prefix="icons">
+    <file>png/accepted_48.png</file>
+    <file>add_48.png</file>
+    <file>box_upload_48.png</file>
+    <file>cancel_48.png</file>
+    <file>cross_48.png</file>
+    <file>database_add_48.png</file>
+    <file>database_remove_48.png</file>
+    <file>folder_add_48.png</file>
+    <file>table_48.png</file>
+    <file>warning_48.png</file>
+    <file>database_warning_48.png</file>
+    <file>database_48.png</file>
+  </qresource>
+</RCC>
