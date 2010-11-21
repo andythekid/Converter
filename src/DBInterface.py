@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import kinterbasdb as k
+import kinterbasdb as k #@UnresolvedImport
 
 class DBAccess:
   def __init__(self, DBFileName):
@@ -52,20 +52,13 @@ class DBAccess:
     for (dates, prim) in self.curs:
       self.probesDict[dates] = prim
     return self.probesDict
+    
+  def getPervoMatrix(self, id, probe):
+    """
+    принимает ид пациента и съема, возврвщвет перво-матрицу съема.
+    !!!ВНИМАНИЕ!!! Эта матрица форматированна своим хитроВЫЕБАННЫМ способом, и использовать ее
+    в чистом виде нельзя. 
+    """
+    SELECT = r"SELECT fft FROM data WHERE id = '" + str(id) + r"'"
+    self.curs.execute(SELECT)
       
-  def strCpToUtf(self, string):
-    """
-    Перекодировка строки cp1251 -> utf-8
-    """
-    return string.decode('cp1251').encode('utf-8')
-  
-  def strUtfToCp(self, string):
-    """
-    Перекодировка строки utf-8 -> cp1251
-    """
-    return string.decode('utf-8').encode('cp1251')
-
-  def __del__(self):
-    pass
-
-
