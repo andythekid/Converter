@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import kinterbasdb as k #@UnresolvedImport
+from datetime import datetime
+import struct
+import cStringIO
 
 class DBAccess:
   def __init__(self, DBFileName):
@@ -55,10 +58,25 @@ class DBAccess:
     
   def getPervoMatrix(self, id, probe):
     """
-    принимает ид пациента и съема, возврвщвет перво-матрицу съема.
+    принимает ид пациента и съема, возвращает перво-матрицу съема.
     !!!ВНИМАНИЕ!!! Эта матрица форматированна своим хитроВЫЕБАННЫМ способом, и использовать ее
     в чистом виде нельзя. 
     """
-    SELECT = r"SELECT fft FROM data WHERE id = '" + str(id) + r"'"
+    dateId = datetime.strptime(probe, '%Y-%m-%d %H:%M:%S')
+    dateStr = dateId.strftime('%d.%m.%Y, %H:%M:%S.000')
+    SELECT = r"SELECT fft FROM data WHERE id = '" + str(id) + r"' AND dates = '" + dateStr + r"'"
     self.curs.execute(SELECT)
-      
+    fft = self.curs.fetchone()
+    #self.fft = struct.unpack('d', fft)
+    file = cStringIO.StringIO(fft[0])
+    # TODO Разобраться с передачей параметров в ReMatrix
+    a = set()
+    while 1:
+      buff = file.read(8)
+      if not buff:
+        break
+      ff = struct.unpack('d', buff)
+      a.add(ff)
+    print len(a)
+    
+    
