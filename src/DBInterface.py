@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
+import TransformMatrix as tm
 import kinterbasdb as k #@UnresolvedImport
 from datetime import datetime
-import struct
-import cStringIO
+import array
 
 class DBAccess:
   def __init__(self, DBFileName):
@@ -56,27 +57,25 @@ class DBAccess:
       self.probesDict[dates] = prim
     return self.probesDict
     
-  def getPervoMatrix(self, id, probe):
+  def getMatrix(self, id, probe):
     """
-    принимает ид пациента и съема, возвращает перво-матрицу съема.
-    !!!ВНИМАНИЕ!!! Эта матрица форматированна своим хитроВЫЕБАННЫМ способом, и использовать ее
-    в чистом виде нельзя. 
+    Принимает ид пациента и съема, возвращает матрицы левого и правого полушарий.
+ 
     """
+    # Преобразуем переданную строку даты в дату
     dateId = datetime.strptime(probe, '%Y-%m-%d %H:%M:%S')
+    # Переформатрируем дату в формат, воспринимаемый БД
     dateStr = dateId.strftime('%d.%m.%Y, %H:%M:%S.000')
+    # Производим запрос к БД
     SELECT = r"SELECT fft FROM data WHERE id = '" + str(id) + r"' AND dates = '" + dateStr + r"'"
     self.curs.execute(SELECT)
+    # Получаем тьюпл, содержащий хекс матрицы в 0-м элементе
     fft = self.curs.fetchone()
-    #self.fft = struct.unpack('d', fft)
-    file = cStringIO.StringIO(fft[0])
-    # TODO Разобраться с передачей параметров в ReMatrix
-    a = set()
-    while 1:
-      buff = file.read(8)
-      if not buff:
-        break
-      ff = struct.unpack('d', buff)
-      a.add(ff)
-    print len(a)
+    # Преобразуем хекс в список double
+    ff = array.array('d')
+    ff.fromstring(str(fft[0]))
+    # Получаем готовые матрицы
+    leftMatrix, rightMatrix = tm.ReMatrix(ff.tolist())
+    return leftMatrix, rightMatrix
     
     
