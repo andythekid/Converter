@@ -22,8 +22,8 @@ class ReMatrix:
     матрицы.
     """
     # Разбиваем список на 2 части, левую и правую.
-    self.leftMatrix = pervoMatrix[:840]
-    self.rightMatrix = pervoMatrix[840:]
+    self.leftMatrix = pervoMatrix[:4096]
+    self.rightMatrix = pervoMatrix[4096:]
     # Создаём массив амплитуд  
     self.Amplitudes = [[None for x in xrange(ROWS)] for y in xrange(COLUMNS)] #@UnusedVariable
     # Расчет амплитуд двух матриц
@@ -44,13 +44,13 @@ class ReMatrix:
     # Размещаем значения normAmplMatrx в правильном порядке и заносим в rezMatrix
     for j, k in zip(xrange(ROWS-1,-1,-1), xrange(ROWS)):
       for i, m in zip(xrange(14,-1,-1), xrange(14)):
-#        self.rezMatrix[m][k] = normAmplMatrx[i][j]
-        print normAmplMatrx[i][j],
+        self.rezMatrix[m][k] = normAmplMatrx[i][j]
+#        print normAmplMatrx[i][j],
       for i, m in zip(xrange(COLUMNS-1,13,-1), xrange(14, COLUMNS)):
-#        self.rezMatrix[m][k] = normAmplMatrx[i][j]
-        print normAmplMatrx[i][j],
-      print
-#    return self.rezMatrix
+        self.rezMatrix[m][k] = normAmplMatrx[i][j]
+#        print normAmplMatrx[i][j],
+#      print
+    return self.rezMatrix
       
   
   def CalcAmplitude(self, pervoMatrix):
