@@ -22,10 +22,10 @@ class ReMatrix:
     матрицы.
     """
     # Разбиваем список на 2 части, левую и правую.
-    self.leftMatrix = pervoMatrix[:4096]
-    self.rightMatrix = pervoMatrix[4096:]
+    self.leftMatrix = pervoMatrix[:16384]
+    self.rightMatrix = pervoMatrix[16384:]
     # Создаём массив амплитуд  
-    self.Amplitudes = [[None for x in xrange(ROWS)] for y in xrange(COLUMNS)] #@UnusedVariable
+    self.Amplitudes = [[None for x in xrange(COLUMNS)] for y in xrange(ROWS)] #@UnusedVariable
     # Расчет амплитуд двух матриц
     self.leftMatrix = self.CalcAmplitude(self.leftMatrix)
     self.rightMatrix = self.CalcAmplitude(self.rightMatrix)

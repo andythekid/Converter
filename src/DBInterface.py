@@ -71,11 +71,12 @@ class DBAccess:
     self.curs.execute(SELECT)
     # Получаем тьюпл, содержащий хекс матрицы в 0-м элементе
     fft = self.curs.fetchone()
-    # Преобразуем хекс в список double
-    ff = array.array('d')
+    # Преобразуем хекс в список unsigned short
+    ff = array.array('H')
     ff.fromstring(str(fft[0]))
     # Получаем готовые матрицы
     leftMatrix, rightMatrix = tm.ReMatrix(ff.tolist())
     return leftMatrix, rightMatrix
+
     
     
