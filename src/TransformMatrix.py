@@ -8,31 +8,29 @@ class ReMatrix:
   """
   global ROWS
   global COLUMNS
-#  global gSpecialDouble
-#  global Amplitudes
   
   ROWS = 35     # количество строк
   COLUMNS = 24  # количество столбцов
   
-  
   def __init__(self, pervoMatrix):
     """
-    Конструктор - единственная функция, используемая извне. Принимает сырой
-    список, полученный из поля fft, возвращает две правильные сегментарные 
-    матрицы.
+    Конструктор  Принимает сырой список, полученный из поля fft, 
+    производит все расчеты
     """
     # Разбиваем список на 2 части, левую и правую.
     self.leftMatrix = pervoMatrix[:16384]
     self.rightMatrix = pervoMatrix[16384:]
-    # Создаём массив амплитуд  
-    self.Amplitudes = [[None for x in xrange(COLUMNS)] for y in xrange(ROWS)] #@UnusedVariable
     # Расчет амплитуд двух матриц
     self.leftMatrix = self.CalcAmplitude(self.leftMatrix)
     self.rightMatrix = self.CalcAmplitude(self.rightMatrix)
     # Переставляем значения матриц
     self.leftMatrix = self.ShuffleMatrix(self.leftMatrix)
     self.rightMatrix = self.ShuffleMatrix(self.rightMatrix)
-    # Возвращаем правильные матрицы
+    
+  def getSegMatrx(self):
+    """
+    Возвращает расчитанные матрицы
+    """
     return self.leftMatrix, self.rightMatrix
   
   def ShuffleMatrix(self, normAmplMatrx):
@@ -40,16 +38,13 @@ class ReMatrix:
     Расстановка значений матрицы в правильном порядке
     """
     # Создаём результирующую матрицу
-    self.rezMatrix = [[None for x in xrange(ROWS)] for y in xrange(COLUMNS)] #@UnusedVariable
+    self.rezMatrix = [[None for x in xrange(COLUMNS)] for y in xrange(ROWS)] #@UnusedVariable
     # Размещаем значения normAmplMatrx в правильном порядке и заносим в rezMatrix
-    for j, k in zip(xrange(ROWS-1,-1,-1), xrange(ROWS)):
-      for i, m in zip(xrange(14,-1,-1), xrange(14)):
+    for i, m in zip(xrange(ROWS-1,-1,-1), xrange(ROWS)):
+      for j, k in zip(xrange(14,-1,-1), xrange(14)):
         self.rezMatrix[m][k] = normAmplMatrx[i][j]
-#        print normAmplMatrx[i][j],
-      for i, m in zip(xrange(COLUMNS-1,13,-1), xrange(14, COLUMNS)):
+      for j, k in zip(xrange(COLUMNS-1,13,-1), xrange(14, COLUMNS)):
         self.rezMatrix[m][k] = normAmplMatrx[i][j]
-#        print normAmplMatrx[i][j],
-#      print
     return self.rezMatrix
       
   
@@ -58,12 +53,14 @@ class ReMatrix:
     Расчет значений амплитуд сегментарной матрицы 
     """
     self.gSpecialDouble = 0.0
+    # Создаём массив амплитуд  
+    Amplitudes = [[None for x in xrange(COLUMNS)] for y in xrange(ROWS)] #@UnusedVariable
     for row in xrange(ROWS):
       for col in xrange(COLUMNS):
         DataIndex = self.GetDataFromTable(row, col)
         self.gSpecialDouble-=DataIndex
-        self.Amplitudes[row][col] = (float(pervoMatrix[DataIndex]) * (1.0 - self.gSpecialDouble) + float(pervoMatrix[DataIndex + 1]) * self.gSpecialDouble) * 0.001388888888888889 * (72.0 - col)
-    return self.Amplitudes
+        Amplitudes[row][col] = (float(pervoMatrix[DataIndex]) * (1.0 - self.gSpecialDouble) + float(pervoMatrix[DataIndex + 1]) * self.gSpecialDouble) * 0.001388888888888889 * (72.0 - col)
+    return Amplitudes
   
   def GetDataFromTable(self, rowIndex, columnIndex):
     FloatTuple = (27.005051, 26.236269, 25.489374, 24.763741, 24.058765, 23.373859, 

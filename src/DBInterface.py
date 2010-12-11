@@ -75,7 +75,8 @@ class DBAccess:
     ff = array.array('H')
     ff.fromstring(str(fft[0]))
     # Получаем готовые матрицы
-    leftMatrix, rightMatrix = tm.ReMatrix(ff.tolist())
+    matrix = tm.ReMatrix(ff.tolist())
+    leftMatrix, rightMatrix = matrix.getSegMatrx()
     return leftMatrix, rightMatrix
 
     
