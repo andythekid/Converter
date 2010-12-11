@@ -54,7 +54,10 @@ class DBAccess:
     self.curs.execute(SELECT)
     self.probesDict = {}
     for (dates, prim) in self.curs:
-      self.probesDict[dates] = prim
+      if prim == None:
+        self.probesDict[dates] = " "
+      else:
+        self.probesDict[dates] = prim.decode('cp1251')
     return self.probesDict
     
   def getMatrix(self, id, probe):

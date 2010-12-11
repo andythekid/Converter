@@ -43,7 +43,7 @@ class Main(QtGui.QMainWindow):
     self.ui.treProbes.clear()
     # Выводим полученные съемы 
     for dates in probes.keys():
-      item = QtGui.QTreeWidgetItem( [ str(dates), probes[dates][0] ] )
+      item = QtGui.QTreeWidgetItem( [ str(dates), probes[dates] ] )
       item.setCheckState(0,QtCore.Qt.Unchecked)
       self.ui.treProbes.addTopLevelItem(item)
 
