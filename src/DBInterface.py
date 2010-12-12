@@ -43,7 +43,11 @@ class DBAccess:
     self.patDict = {}
     # Заносим в словарь извлеченные данные. ID пациента - ключ
     for (id, fio, daterojd, sex) in self.curs:
-      self.patDict[id] = [fio.decode('cp1251'), daterojd, sex]
+      if sex == 0:
+        strSex = u'М'
+      else:
+        strSex = u'Ж'
+      self.patDict[id] = [fio.decode('cp1251'), daterojd, strSex]
     return self.patDict
   
   def getPatientInfo(self, id):

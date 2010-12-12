@@ -5,16 +5,28 @@ import sys
 from PyQt4 import QtGui, QtCore
 from MainForm import Ui_MainWindow
 import DBInterface as db
+import platform
+
+
+__version__ = "0.0.1b"
 
 class Main(QtGui.QMainWindow):
   def __init__(self):
     QtGui.QMainWindow.__init__(self)
     self.ui=Ui_MainWindow()
     self.ui.setupUi(self)
-    self.statusBar().showMessage(u'Готов')
+    # Объявляем слоты
+    # Выход из программы
     self.ui.actionExit.triggered.connect(self.close)
+    # Открыть БД
     self.ui.actionDBOpen.triggered.connect(self.openDB)
-    self.ui.trePatients.itemClicked.connect(self.clickedItem)
+    # Закрыть БД
+    self.ui.actionDBClose.triggered.connect(self.closeDB)
+    # Отобразить съемы пациента
+    self.ui.trePatients.itemClicked.connect(self.listProbes)
+    # Вывести окошко 'О программе'
+    self.ui.actAboutShow.triggered.connect(self.helpAbout)
+    self.statusBar().showMessage(u'Готов')
 
   def openDB(self):
     '''
@@ -29,12 +41,25 @@ class Main(QtGui.QMainWindow):
     patients = base.getAllPatients()
     # Выводим его 
     for id in patients.keys():
-      item = QtGui.QTreeWidgetItem( [ str(id), patients[id][0], str(patients[id][1]), str(patients[id][2]) ] )
+      # Порядок полей: ID, ФИО, дата рождения, пол
+      item = QtGui.QTreeWidgetItem( [ str(id), patients[id][0], str(patients[id][1]), patients[id][2] ] )
       item.setCheckState(0,QtCore.Qt.Unchecked)
       self.ui.trePatients.addTopLevelItem(item)
     self.statusBar().showMessage(u'База данных загружена. Найдено '+str(len(patients))+u' пациентов.')
     
-  def clickedItem(self, item):
+  def closeDB(self):
+    '''
+    Закрыть БД
+    '''
+    # Очищаем элементы формы
+    self.ui.treProbes.clear()
+    self.ui.trePatients.clear()
+    self.statusBar().showMessage(u'Готов')
+    
+  def listProbes(self, item):
+    '''
+    Отобразить съемы выбранного пациента
+    '''
     # Получаем Id текущего пациента
     id = item.text(0)
     # Запрашиваем из базы все съемы пациента с данным Id
@@ -47,6 +72,21 @@ class Main(QtGui.QMainWindow):
       item.setCheckState(0,QtCore.Qt.Unchecked)
       self.ui.treProbes.addTopLevelItem(item)
 
+  def helpAbout(self):
+    '''
+    Отобразить окошко About
+    '''
+    QtGui.QMessageBox.about(self, "About Converter",
+                            u"""<b>MEGI Converter</b> v %s
+                            <p>Copyright &copy; 2010 Neurocyb.
+                            All rights reserved.
+                            <p>Приложение для конвертирования БД МЭГИ в
+                            открытые форматы.
+                            <p>Python %s - Qt %s - PyQt %s on %s
+                            """ % (__version__, platform.python_version(),
+                            QtCore.QT_VERSION_STR, QtCore.PYQT_VERSION_STR,
+                            platform.system() ) 
+                            )
 
 def main():
   app = QtGui.QApplication(sys.argv)
