@@ -27,7 +27,7 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout_2">
     <item>
-     <widget class="QTabWidget" name="tabWidget">
+     <widget class="QTabWidget" name="tabWidMain">
       <property name="currentIndex">
        <number>0</number>
       </property>
@@ -258,53 +258,79 @@
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_4">
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_3">
-          <item>
-           <widget class="QTreeWidget" name="treExportProbes">
-            <property name="alternatingRowColors">
-             <bool>true</bool>
+         <widget class="QSplitter" name="splitter_2">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <widget class="QTreeWidget" name="treExportProbes">
+           <property name="alternatingRowColors">
+            <bool>true</bool>
+           </property>
+           <property name="rootIsDecorated">
+            <bool>false</bool>
+           </property>
+           <property name="uniformRowHeights">
+            <bool>true</bool>
+           </property>
+           <property name="sortingEnabled">
+            <bool>true</bool>
+           </property>
+           <property name="allColumnsShowFocus">
+            <bool>true</bool>
+           </property>
+           <attribute name="headerDefaultSectionSize">
+            <number>80</number>
+           </attribute>
+           <column>
+            <property name="text">
+             <string>ID</string>
             </property>
-            <property name="rootIsDecorated">
-             <bool>false</bool>
+           </column>
+           <column>
+            <property name="text">
+             <string>Ф.И.О.</string>
             </property>
-            <property name="uniformRowHeights">
-             <bool>true</bool>
+           </column>
+           <column>
+            <property name="text">
+             <string>Дата съема</string>
             </property>
-            <property name="sortingEnabled">
-             <bool>true</bool>
+           </column>
+           <column>
+            <property name="text">
+             <string>Описание</string>
             </property>
-            <property name="allColumnsShowFocus">
-             <bool>true</bool>
-            </property>
-            <attribute name="headerDefaultSectionSize">
-             <number>80</number>
+           </column>
+          </widget>
+          <widget class="QTabWidget" name="tabWidView">
+           <property name="tabPosition">
+            <enum>QTabWidget::East</enum>
+           </property>
+           <property name="currentIndex">
+            <number>1</number>
+           </property>
+           <widget class="QWidget" name="tabMatrix">
+            <attribute name="title">
+             <string>Матрица</string>
             </attribute>
-            <column>
-             <property name="text">
-              <string>ID</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>Ф.И.О.</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>Дата съема</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>Описание</string>
-             </property>
-            </column>
            </widget>
-          </item>
-          <item>
-           <widget class="QGraphicsView" name="graphicsView"/>
-          </item>
-         </layout>
+           <widget class="QWidget" name="tabSegment">
+            <attribute name="title">
+             <string>Сегмент</string>
+            </attribute>
+            <layout class="QHBoxLayout" name="horizontalLayout_3">
+             <item>
+              <widget class="QGraphicsView" name="graphicsView"/>
+             </item>
+            </layout>
+           </widget>
+           <widget class="QWidget" name="tabFunction">
+            <attribute name="title">
+             <string>Функция</string>
+            </attribute>
+           </widget>
+          </widget>
+         </widget>
         </item>
        </layout>
       </widget>

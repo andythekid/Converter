@@ -1,6 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+"""
+Created on 19.11.2010
+
+@author: Andrey Volkov
+@contact: evil.bobby@gmail.com
+"""
+
 import TransformMatrix as tm
 import kinterbasdb as k #@UnresolvedImport
 from datetime import datetime

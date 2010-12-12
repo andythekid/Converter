@@ -5,8 +5,8 @@ import sys
 from PyQt4 import QtGui, QtCore
 from MainForm import Ui_MainWindow
 import DBInterface as db
+import ExportProbes as pr
 import platform
-
 
 __version__ = "0.0.1b"
 
@@ -32,6 +32,9 @@ class Main(QtGui.QMainWindow):
     '''
     Открыть БД и отобразить список пациентов
     '''
+    # Создаём новый список экспортных пациентов
+    global patLst
+    patLst = pr.ExportProbes()
     # Получаем имя базы
     filename = QtGui.QFileDialog.getOpenFileName(self, u'Выберете файл базы данных', QtCore.QDir.homePath(), u"Базы данных (*.gdb *.GDB)")
     # Подключаемся к базе
@@ -60,8 +63,14 @@ class Main(QtGui.QMainWindow):
     '''
     Отобразить съемы выбранного пациента
     '''
+    # В случае, если отображение происходит не первый раз
+    if patLst.getID() != None:
+      pass
     # Получаем Id текущего пациента
     id = item.text(0)
+    # Сохранить Id текущего пациента в список экспортных пациентов для
+    # последующего формирования элементов списка
+    patLst.putID(id)
     # Запрашиваем из базы все съемы пациента с данным Id
     probes = base.getPatientInfo(id)
     # Очищаем лист съемов
