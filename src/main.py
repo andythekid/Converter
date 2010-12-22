@@ -27,6 +27,8 @@ class Main(QtGui.QMainWindow):
     self.ui.actionDBClose.triggered.connect(self.closeDB)
     # Отобразить съемы пациента
     self.ui.trePatients.itemClicked.connect(self.listProbes)
+    # Экспорт
+    self.ui.actionExport.triggered.connect(self.exportProbes)
     # Вывести окошко 'О программе'
     self.ui.actAboutShow.triggered.connect(self.helpAbout)
     self.statusBar().showMessage(u'Готов')
@@ -113,8 +115,6 @@ class Main(QtGui.QMainWindow):
         item.setCheckState(0,QtCore.Qt.Unchecked)
       self.ui.treProbes.addTopLevelItem(item)
     
- 
-  
   def refreshExportList(self):
     '''
     Перезагрузить список экспортных съемов.
@@ -128,6 +128,31 @@ class Main(QtGui.QMainWindow):
       for date in exportLst[patient].keys():
         item = QtGui.QTreeWidgetItem([patient, base.getPatientName(patient), date, exportLst[patient][date] ])
         self.ui.treExportProbes.addTopLevelItem(item)
+
+  def exportProbes(self):
+    '''
+    Экспортирование съемов
+    '''
+    # Получаем список съемов, приготовленнных к экспорту
+    exportLst = self.patLst.getAllProbes()
+    for patient in exportLst.keys():
+      for date in exportLst[patient].keys():
+        fileName = base.getPatientName(patient)+'_'+date
+        tmpFile = open(fileName, "w")
+        lMatr, rMatr = base.getMatrix(patient, date)
+        for i in xrange(35):
+          for j in xrange(24):
+            tmpFile.write(str(lMatr[i][j]))
+            tmpFile.write('; ')
+          tmpFile.write('\n')
+        for i in xrange(35):
+          for j in xrange(24):
+            tmpFile.write(str(rMatr[i][j]))
+            tmpFile.write('; ')
+          tmpFile.write('\n')        
+        tmpFile.close()
+    self.statusBar().showMessage(u'Экспорт прошёл успешно')
+
   
   def helpAbout(self):
     '''
