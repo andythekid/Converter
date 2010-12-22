@@ -33,7 +33,7 @@ class ExportProbes:
     """
     return self.patientID
   
-  def getProbes(self):
+  def getAllProbes(self):
     """
     Возвращает список всех съемов из списка.
     """

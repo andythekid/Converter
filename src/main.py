@@ -80,7 +80,7 @@ class Main(QtGui.QMainWindow):
       for itemN in xrange(self.ui.treProbes.topLevelItemCount()):
         item = self.ui.treProbes.topLevelItem(itemN)
         if item.checkState(0):
-          tmpLst.extend([[str(item.text(0)), str(item.text(1))]])
+          tmpLst.extend([[str(item.text(0)), item.text(1)]])
       # Сохраняем список чекнутых
       self.patLst.reSetProbes(id, tmpLst)
       # Перезагружаем виджет со списком экспорта
@@ -119,8 +119,15 @@ class Main(QtGui.QMainWindow):
     '''
     Перезагрузить список экспортных съемов.
     '''
+    # Очищаем виджет экспортных съёмов
+    self.ui.treExportProbes.clear()
     # Получаем список съемов, приготовленнных к экспорту
-    self.patLst.getProbes()
+    exportLst = self.patLst.getAllProbes()
+    # Выводим экспортные съёмы
+    for patient in exportLst.keys():
+      for date in exportLst[patient].keys():
+        item = QtGui.QTreeWidgetItem([patient, base.getPatientName(patient), date, exportLst[patient][date] ])
+        self.ui.treExportProbes.addTopLevelItem(item)
   
   def helpAbout(self):
     '''

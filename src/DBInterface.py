@@ -57,6 +57,16 @@ class DBAccess:
       self.patDict[id] = [fio.decode('cp1251'), daterojd, strSex]
     return self.patDict
   
+  def getPatientName(self, id):
+    """
+    Возвращает ФИО пациента по id
+    """
+    SELECT = r"SELECT fio FROM card WHERE id = '" + str(id) + r"'"
+    self.curs.execute(SELECT)
+    fio = self.curs.fetchone()
+    return fio[0].decode('cp1251')
+    
+  
   def getPatientInfo(self, id):
     """
     Принимает ID пациента, возвращает массив съемов пациента с заданным ID
