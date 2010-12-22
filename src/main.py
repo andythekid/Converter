@@ -33,8 +33,7 @@ class Main(QtGui.QMainWindow):
     Открыть БД и отобразить список пациентов
     '''
     # Создаём новый список экспортных пациентов
-    global patLst
-    patLst = pr.ExportProbes()
+    self.patLst = pr.ExportProbes()
     # Получаем имя базы
     filename = QtGui.QFileDialog.getOpenFileName(self, u'Выберете файл базы данных', QtCore.QDir.homePath(), u"Базы данных (*.gdb *.GDB)")
     # Подключаемся к базе
@@ -57,6 +56,8 @@ class Main(QtGui.QMainWindow):
     # Очищаем элементы формы
     self.ui.treProbes.clear()
     self.ui.trePatients.clear()
+    # Удаляем список экспортных пациентов
+    del self.patLst
     self.statusBar().showMessage(u'Готов')
     
   def listProbes(self, item):
@@ -64,13 +65,13 @@ class Main(QtGui.QMainWindow):
     Отобразить съемы выбранного пациента
     '''
     # В случае, если отображение происходит не первый раз
-    if patLst.getID() != None:
+    if self.patLst.getID() != None:
       pass
     # Получаем Id текущего пациента
     id = item.text(0)
     # Сохранить Id текущего пациента в список экспортных пациентов для
     # последующего формирования элементов списка
-    patLst.putID(id)
+    self.patLst.putID(id)
     # Запрашиваем из базы все съемы пациента с данным Id
     probes = base.getPatientInfo(id)
     # Очищаем лист съемов

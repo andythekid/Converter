@@ -33,23 +33,23 @@ class ExportProbes:
     """
     return self.patientID
   
-  def addProbes(self, probe):
-    """
-    Добавляет переданный съем в список.
-    """
-    pass
-    
   def getProbes(self):
     """
     Возвращает список всех съемов из списка.
     """
     return self.probesList
-    
-  def delProbes(self, probe):
+
+  def reSetProbes(self, id, probes):
     """
-    Удаляет переданный съем из списка.
+    Переустанавливает список съемов пациента.
     """
     pass
-        
+  
+  def getCheckedProbes(self, id):
+    """
+    Возвращает список съемов пациента, сохранённых для обработки
+    """
+    pass
+
 if __name__ == '__main__':
   pass
