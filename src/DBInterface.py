@@ -92,6 +92,3 @@ class DBAccess:
     matrix = tm.ReMatrix(ff.tolist())
     leftMatrix, rightMatrix = matrix.getSegMatrx()
     return leftMatrix, rightMatrix
-
-    
-    

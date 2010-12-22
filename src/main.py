@@ -3,8 +3,11 @@
 
 import sys
 from PyQt4 import QtGui, QtCore
+# Главное окно
 from MainForm import Ui_MainWindow
+# Класс доступа к обрабатываемой БД
 import DBInterface as db
+# Класс хранения списка съемов для обработки
 import ExportProbes as pr
 import platform
 
@@ -60,28 +63,65 @@ class Main(QtGui.QMainWindow):
     del self.patLst
     self.statusBar().showMessage(u'Готов')
     
-  def listProbes(self, item):
+  def listProbes(self, patient):
     '''
     Отобразить съемы выбранного пациента
     '''
+    #--------------------------------------------------
+    # 1 часть: обработка и сохранение старых данных
+    #--------------------------------------------------
+    
     # В случае, если отображение происходит не первый раз
-    if self.patLst.getID() != None:
-      pass
-    # Получаем Id текущего пациента
-    id = item.text(0)
+    id = self.patLst.getID()
+    if id != None:
+      # создаем временный список чекнутых съемов
+      tmpLst = []
+      # Сохраняем список чекнутых съемов на экспорт
+      for itemN in xrange(self.ui.treProbes.topLevelItemCount()):
+        item = self.ui.treProbes.topLevelItem(itemN)
+        if item.checkState(0):
+          tmpLst.extend([[str(item.text(0)), str(item.text(1))]])
+      # Сохраняем список чекнутых
+      self.patLst.reSetProbes(id, tmpLst)
+      # Перезагружаем виджет со списком экспорта
+      self.refreshExportList()
+    
+    #--------------------------------------------------
+    # 2 часть: вывод новых данных
+    #--------------------------------------------------
+    
+    # Получаем Id текущего пациента из виджета списка пациентов
+    id = patient.text(0)
     # Сохранить Id текущего пациента в список экспортных пациентов для
     # последующего формирования элементов списка
     self.patLst.putID(id)
-    # Запрашиваем из базы все съемы пациента с данным Id
-    probes = base.getPatientInfo(id)
     # Очищаем лист съемов
     self.ui.treProbes.clear()
-    # Выводим полученные съемы 
-    for dates in probes.keys():
-      item = QtGui.QTreeWidgetItem( [ str(dates), probes[dates] ] )
-      item.setCheckState(0,QtCore.Qt.Unchecked)
+    # Запрашиваем из базы все съемы пациента с данным Id
+    probes = base.getPatientInfo(id)
+    # Получаем список съемов, уже присутствующих в списке экспорта
+    chkLst = self.patLst.getCheckedProbes(id)
+    # Выводим полученные данные в виджет вывода съемов 
+    for date in probes.keys():
+      item = QtGui.QTreeWidgetItem( [ str(date), probes[date] ] )
+      # Если съем присутствует в списке на экспорт
+      if chkLst.has_key(str(date)):
+        # Отмечаем его галочкой
+        item.setCheckState(0,QtCore.Qt.Checked)
+      else:
+        # Иначе снимаем галочку
+        item.setCheckState(0,QtCore.Qt.Unchecked)
       self.ui.treProbes.addTopLevelItem(item)
-
+    
+ 
+  
+  def refreshExportList(self):
+    '''
+    Перезагрузить список экспортных съемов.
+    '''
+    # Получаем список съемов, приготовленнных к экспорту
+    self.patLst.getProbes()
+  
   def helpAbout(self):
     '''
     Отобразить окошко About
