@@ -133,11 +133,12 @@ class Main(QtGui.QMainWindow):
     '''
     Экспортирование съемов
     '''
+    dirName = str(QtGui.QFileDialog.getExistingDirectory(self, u'Выберете дирректорию сохранения'))
     # Получаем список съемов, приготовленнных к экспорту
     exportLst = self.patLst.getAllProbes()
     for patient in exportLst.keys():
       for date in exportLst[patient].keys():
-        fileName = base.getPatientName(patient)+'_'+date
+        fileName = dirName + base.getPatientName(patient) + '_'+date
         tmpFile = open(fileName, "w")
         lMatr, rMatr = base.getMatrix(patient, date)
         for i in xrange(35):
