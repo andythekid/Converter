@@ -44,7 +44,7 @@ class Main(QtGui.QMainWindow):
     # Получаем имя базы
     filename = QtGui.QFileDialog.getOpenFileName(self, u'Выберете файл базы данных', QtCore.QDir.homePath(), u"Базы данных (*.gdb *.GDB)")
     # Борьба с кодировками (TODO вынести в отдельный класс)
-    if platform.system() == 'Windows':
+    if platform.system() == 'Windows' or 'Microsoft':
       filename = unicode(filename).encode('cp1251')
     else:
       filename = str(filename)
@@ -114,7 +114,7 @@ class Main(QtGui.QMainWindow):
     for date in probes.keys():
       item = QtGui.QTreeWidgetItem( [ date.strftime('%Y-%m-%d %H:%M:%S'), probes[date] ] )
       # Если съем присутствует в списке на экспорт
-      if chkLst.has_key(str(date)):
+      if chkLst.has_key(date.strftime('%Y-%m-%d %H:%M:%S')):
         # Отмечаем его галочкой
         item.setCheckState(0,QtCore.Qt.Checked)
       else:
@@ -140,7 +140,7 @@ class Main(QtGui.QMainWindow):
     '''
     Экспортирование съемов
     '''
-    if platform.system() == 'Windows':
+    if platform.system() == 'Windows' or 'Microsoft':
       dirName = unicode(QtGui.QFileDialog.getExistingDirectory(self, u'Выберете дирректорию сохранения')).encode('cp1251')
     else:
       dirName = str(QtGui.QFileDialog.getExistingDirectory(self, u'Выберете дирректорию сохранения'))
@@ -151,7 +151,7 @@ class Main(QtGui.QMainWindow):
         #fileName = dirName + base.getPatientName(patient) + '_'+date
         trueDate = datetime.strptime(date, '%Y-%m-%d %H:%M:%S')
         dateStr = trueDate.strftime('%Y-%m-%d-%H-%M-%S')
-        if platform.system() == 'Windows':
+        if platform.system() == 'Windows' or 'Microsoft':
           patientName = base.getPatientName(patient).encode('cp1251')
         else:
           patientName = str(base.getPatientName(patient))
