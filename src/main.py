@@ -43,9 +43,14 @@ class Main(QtGui.QMainWindow):
     self.patLst = pr.ExportProbes()
     # Получаем имя базы
     filename = QtGui.QFileDialog.getOpenFileName(self, u'Выберете файл базы данных', QtCore.QDir.homePath(), u"Базы данных (*.gdb *.GDB)")
+    # Борьба с кодировками (TODO вынести в отдельный класс)
+    if platform.system() == 'Windows':
+      filename = unicode(filename).encode('cp1251')
+    else:
+      filename = str(filename)
     # Подключаемся к базе
     global base
-    base = db.DBAccess(str(filename))
+    base = db.DBAccess(filename)
     # Получаем список пациентов
     patients = base.getAllPatients()
     # Выводим его 
@@ -135,7 +140,10 @@ class Main(QtGui.QMainWindow):
     '''
     Экспортирование съемов
     '''
-    dirName = str(QtGui.QFileDialog.getExistingDirectory(self, u'Выберете дирректорию сохранения'))
+    if platform.system() == 'Windows':
+      dirName = unicode(QtGui.QFileDialog.getExistingDirectory(self, u'Выберете дирректорию сохранения')).encode('cp1251')
+    else:
+      dirName = str(QtGui.QFileDialog.getExistingDirectory(self, u'Выберете дирректорию сохранения'))
     # Получаем список съемов, приготовленнных к экспорту
     exportLst = self.patLst.getAllProbes()
     for patient in exportLst.keys():
@@ -143,7 +151,11 @@ class Main(QtGui.QMainWindow):
         #fileName = dirName + base.getPatientName(patient) + '_'+date
         trueDate = datetime.strptime(date, '%Y-%m-%d %H:%M:%S')
         dateStr = trueDate.strftime('%Y-%m-%d-%H-%M-%S')
-        fileName = os.path.join(dirName, str(base.getPatientName(patient)) + '_' + dateStr)
+        if platform.system() == 'Windows':
+          patientName = base.getPatientName(patient).encode('cp1251')
+        else:
+          patientName = str(base.getPatientName(patient))
+        fileName = os.path.join(dirName, patientName + '_' + dateStr + '.txt')
         tmpFile = open(fileName, "w")
         lMatr, rMatr = base.getMatrix(patient, date)
         for i in xrange(35):
