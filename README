@@ -20,5 +20,40 @@ $ sudo apt-get install python-kinterbasdb
 Qt4 (Библиотека создания графического интерфейса пользователя (GUI))
 $ sudo apt-get install pyqt4-dev-tools
 
-OpenGL (Библиотека работы с 2d/3d графикой. Используется для отрисовки сегментарной матрицы и разного рода графиков)
+OpenGL (Библиотека работы с 2d/3d графикой. Используется для отрисовки сегментарной 
+матрицы и разного рода графиков)
 $ sudo apt-get install -y  python-opengl python-qt4-gl python-qt4-sql
+
+
+Windows
+
+Python 2.6
+Скачайте с http://www.python.org/download/releases/ или возьмите из папки Distro
+файл python-2.6.X.msi (где X - номер минорной версии, может быть любым.)
+Установите, оставив все значения по умолчанию неизменными.
+
+Firebird 2.1 (Сервер баз данных, совместимый с Interbase)
+
+eGenix.com mx Base
+Скачайте с http://www.egenix.com/products/python/mxBase/ или возьмите из папки Distro
+файл egenix-mx-base-3.1.3.win32-py2.6.msi.
+Установите, оставив все значения по умолчанию неизменными.
+
+MinGW (Портированный под Win системы компилятор gcc. Нужен для сборки KinterbasDB)
+Скачайте с http://sourceforge.net/projects/mingw/files/Automated%20MinGW%20Installer/mingw-get-inst/
+или возьмите из папки Distro файл mingw-get-inst-20101030.exe.
+
+KinterbasDB (Библиотека работы с Interbase/Firebird посредством языка Python)
+Скачайте с http://sourceforge.net/projects/kinterbasdb/files/kinterbasdb/ самый
+свежий файл с именем kinterbasdb-X.X.src.tar.gz (где X.X. - версия файла) или возьмите его 
+из папки Distro.
+Распакуйте архив, откройте консоль, перейдите консолью в папку с сорцами.
+Выполните комманду  python setup.py build --compiler=mingw32
+(При этом в переменной PATH должен быть указан путь до бинарников MINGW,
+например C:\WinGW\bin).
+После компиляции скопируйте папку build/lib.platform-pyver/kinterbasdb в дирректорию,
+содержащую python, поддирректорию Lib. Старую папку kinterbasdb при этом удалите.
+
+Qt4 (Библиотека создания графического интерфейса пользователя (GUI))
+
+OpenGL (Библиотека работы с 2d/3d графикой. Используется для отрисовки сегментарной 

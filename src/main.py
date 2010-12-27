@@ -9,9 +9,11 @@ from MainForm import Ui_MainWindow
 import DBInterface as db
 # Класс хранения списка съемов для обработки
 import ExportProbes as pr
+from datetime import datetime
 import platform
+import os
 
-__version__ = "0.0.1b"
+__version__ = "0.0.2b"
 
 class Main(QtGui.QMainWindow):
   def __init__(self):
@@ -105,7 +107,7 @@ class Main(QtGui.QMainWindow):
     chkLst = self.patLst.getCheckedProbes(id)
     # Выводим полученные данные в виджет вывода съемов 
     for date in probes.keys():
-      item = QtGui.QTreeWidgetItem( [ str(date), probes[date] ] )
+      item = QtGui.QTreeWidgetItem( [ date.strftime('%Y-%m-%d %H:%M:%S'), probes[date] ] )
       # Если съем присутствует в списке на экспорт
       if chkLst.has_key(str(date)):
         # Отмечаем его галочкой
@@ -138,7 +140,10 @@ class Main(QtGui.QMainWindow):
     exportLst = self.patLst.getAllProbes()
     for patient in exportLst.keys():
       for date in exportLst[patient].keys():
-        fileName = dirName + base.getPatientName(patient) + '_'+date
+        #fileName = dirName + base.getPatientName(patient) + '_'+date
+        trueDate = datetime.strptime(date, '%Y-%m-%d %H:%M:%S')
+        dateStr = trueDate.strftime('%Y-%m-%d-%H-%M-%S')
+        fileName = os.path.join(dirName, str(base.getPatientName(patient)) + '_' + dateStr)
         tmpFile = open(fileName, "w")
         lMatr, rMatr = base.getMatrix(patient, date)
         for i in xrange(35):
