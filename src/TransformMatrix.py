@@ -53,9 +53,9 @@ class ReMatrix:
     self.rezMatrix = [[None for x in xrange(COLUMNS)] for y in xrange(ROWS)] #@UnusedVariable
     # Размещаем значения normAmplMatrx в правильном порядке и заносим в rezMatrix
     for i, m in zip(xrange(ROWS-1,-1,-1), xrange(ROWS)):
-      for j, k in zip(xrange(14,-1,-1), xrange(14)):
+      for j, k in zip(xrange(14,-1,-1), xrange(15)):
         self.rezMatrix[m][k] = normAmplMatrx[i][j]
-      for j, k in zip(xrange(COLUMNS-1,13,-1), xrange(14, COLUMNS)):
+      for j, k in zip(xrange(COLUMNS-1,14,-1), xrange(15, COLUMNS)):
         self.rezMatrix[m][k] = normAmplMatrx[i][j]
     return self.rezMatrix
       
