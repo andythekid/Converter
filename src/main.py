@@ -10,10 +10,12 @@ import DBInterface as db
 # Класс хранения списка съемов для обработки
 import ExportProbes as pr
 from datetime import datetime
+# Платформозависимые функции-обёртки
+import PlatformUtils as pu
 import platform
 import os
 
-__version__ = "0.0.2b"
+__version__ = "0.0.5b"
 
 class Main(QtGui.QMainWindow):
   def __init__(self):
@@ -41,13 +43,8 @@ class Main(QtGui.QMainWindow):
     '''
     # Создаём новый список экспортных пациентов
     self.patLst = pr.ExportProbes()
-    # Получаем имя базы
-    filename = QtGui.QFileDialog.getOpenFileName(self, u'Выберете файл базы данных', QtCore.QDir.homePath(), u"Базы данных (*.gdb *.GDB)")
-    # Борьба с кодировками (TODO вынести в отдельный класс)
-    if platform.system() == ('Windows' or 'Microsoft'):
-      filename = unicode(filename).encode('cp1251')
-    else:
-      filename = str(filename)
+    # Получаем имя базы в системной кодировке
+    filename = pu.convert(QtGui.QFileDialog.getOpenFileName(self, u'Выберете файл базы данных', QtCore.QDir.homePath(), u"Базы данных (*.gdb *.GDB)"))
     # Подключаемся к базе
     global base
     base = db.DBAccess(filename)
@@ -140,24 +137,27 @@ class Main(QtGui.QMainWindow):
     '''
     Экспортирование съемов
     '''
-    if platform.system() == ('Windows' or 'Microsoft'):
-      dirName = unicode(QtGui.QFileDialog.getExistingDirectory(self, u'Выберете дирректорию сохранения')).encode('cp1251')
-    else:
-      dirName = str(QtGui.QFileDialog.getExistingDirectory(self, u'Выберете дирректорию сохранения'))
+    # Запрашиваем дирректорию сохраниения съемов в системной кодировке
+    dirName = pu.convert(QtGui.QFileDialog.getExistingDirectory(self, u'Выберете дирректорию сохранения'))
     # Получаем список съемов, приготовленнных к экспорту
     exportLst = self.patLst.getAllProbes()
+    # Для каждого пациента в списке экспортных съемов
     for patient in exportLst.keys():
+      # Для каждого съема конкретного пациента
       for date in exportLst[patient].keys():
-        #fileName = dirName + base.getPatientName(patient) + '_'+date
+        # Получаем дату съема
         trueDate = datetime.strptime(date, '%Y-%m-%d %H:%M:%S')
+        # преобразуем её в строку особого вида
         dateStr = trueDate.strftime('%Y-%m-%d-%H-%M-%S')
-        if platform.system() == ('Windows' or 'Microsoft'):
-          patientName = base.getPatientName(patient).encode('cp1251')
-        else:
-          patientName = str(base.getPatientName(patient))
+        # Получаем Ф.И.О пациента в нужной кодировке
+        patientName = pu.convert(base.getPatientName(patient))
+        # Суммируем полученные ранее переменные в полное имя файла
         fileName = os.path.join(dirName, patientName + '_' + dateStr + '.txt')
+        # Открываем файл на запись
         tmpFile = open(fileName, "w")
+        # Получаем матрицы съема
         lMatr, rMatr = base.getMatrix(patient, date)
+        # Пишем матрицы по очереди в файл (Формат Новосибирска)
         for i in xrange(35):
           for j in xrange(24):
             tmpFile.write(str(lMatr[i][j]))
@@ -167,8 +167,10 @@ class Main(QtGui.QMainWindow):
           for j in xrange(24):
             tmpFile.write(str(rMatr[i][j]))
             tmpFile.write('; ')
-          tmpFile.write('\n')        
+          tmpFile.write('\n')  
+        # Закрываем файл      
         tmpFile.close()
+    # Информируем пользователя
     self.statusBar().showMessage(u'Экспорт прошёл успешно')
 
   
