@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'MainForm.ui'
 #
-# Created: Mon Dec 13 01:16:02 2010
+# Created: Wed Jan  5 21:37:30 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -214,11 +214,11 @@ class Ui_MainWindow(object):
         icon5.addPixmap(QtGui.QPixmap(":/icons/cross_48.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.actionExit.setIcon(icon5)
         self.actionExit.setObjectName("actionExit")
-        self.actSelrctAll = QtGui.QAction(MainWindow)
+        self.actSelectAll = QtGui.QAction(MainWindow)
         icon6 = QtGui.QIcon()
         icon6.addPixmap(QtGui.QPixmap(":/icons/add_48.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.actSelrctAll.setIcon(icon6)
-        self.actSelrctAll.setObjectName("actSelrctAll")
+        self.actSelectAll.setIcon(icon6)
+        self.actSelectAll.setObjectName("actSelectAll")
         self.action = QtGui.QAction(MainWindow)
         self.action.setCheckable(True)
         self.action.setObjectName("action")
@@ -233,7 +233,7 @@ class Ui_MainWindow(object):
         self.action_1.setObjectName("action_1")
         self.menu.addAction(self.actionDBOpen)
         self.menu.addAction(self.actionDBClose)
-        self.menu.addAction(self.actSelrctAll)
+        self.menu.addAction(self.actSelectAll)
         self.menu.addAction(self.actionExport)
         self.menu.addSeparator()
         self.menu.addAction(self.actionExit)
@@ -251,7 +251,7 @@ class Ui_MainWindow(object):
         self.menubar.addAction(self.menu_3.menuAction())
         self.menubar.addAction(self.menu_4.menuAction())
         self.toolBarMain.addAction(self.actionDBOpen)
-        self.toolBarMain.addAction(self.actSelrctAll)
+        self.toolBarMain.addAction(self.actSelectAll)
         self.toolBarMain.addAction(self.actionExport)
         self.toolBarMain.addAction(self.actionDBClose)
         self.toolBarMain.addAction(self.actionExit)
@@ -293,7 +293,7 @@ class Ui_MainWindow(object):
         self.tabWidView.setTabText(self.tabWidView.indexOf(self.tabMatrix), QtGui.QApplication.translate("MainWindow", "Матрица", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidView.setTabText(self.tabWidView.indexOf(self.tabSegment), QtGui.QApplication.translate("MainWindow", "Сегмент", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidView.setTabText(self.tabWidView.indexOf(self.tabFunction), QtGui.QApplication.translate("MainWindow", "Функция", None, QtGui.QApplication.UnicodeUTF8))
-        self.tabWidMain.setTabText(self.tabWidMain.indexOf(self.viewTab), QtGui.QApplication.translate("MainWindow", "Просмотр", None, QtGui.QApplication.UnicodeUTF8))
+        self.tabWidMain.setTabText(self.tabWidMain.indexOf(self.viewTab), QtGui.QApplication.translate("MainWindow", "Обработка", None, QtGui.QApplication.UnicodeUTF8))
         self.menu.setTitle(QtGui.QApplication.translate("MainWindow", "Файл", None, QtGui.QApplication.UnicodeUTF8))
         self.menu_2.setTitle(QtGui.QApplication.translate("MainWindow", "Вид", None, QtGui.QApplication.UnicodeUTF8))
         self.menu_4.setTitle(QtGui.QApplication.translate("MainWindow", "Справка", None, QtGui.QApplication.UnicodeUTF8))
@@ -308,7 +308,7 @@ class Ui_MainWindow(object):
         self.actAboutShow.setText(QtGui.QApplication.translate("MainWindow", "О программе", None, QtGui.QApplication.UnicodeUTF8))
         self.actionExit.setText(QtGui.QApplication.translate("MainWindow", "Выход", None, QtGui.QApplication.UnicodeUTF8))
         self.actionExit.setToolTip(QtGui.QApplication.translate("MainWindow", "Закрыть программу", None, QtGui.QApplication.UnicodeUTF8))
-        self.actSelrctAll.setText(QtGui.QApplication.translate("MainWindow", "Выбрать все", None, QtGui.QApplication.UnicodeUTF8))
+        self.actSelectAll.setText(QtGui.QApplication.translate("MainWindow", "Выбрать все", None, QtGui.QApplication.UnicodeUTF8))
         self.action.setText(QtGui.QApplication.translate("MainWindow", "Инструменты", None, QtGui.QApplication.UnicodeUTF8))
         self.action_3.setText(QtGui.QApplication.translate("MainWindow", "Индекс напряжения", None, QtGui.QApplication.UnicodeUTF8))
         self.action_4.setText(QtGui.QApplication.translate("MainWindow", "Без нормализации", None, QtGui.QApplication.UnicodeUTF8))

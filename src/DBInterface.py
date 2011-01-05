@@ -8,12 +8,17 @@ Created on 19.11.2010
 @contact: evil.bobby@gmail.com
 """
 
+# Извлечение чистых данных сегментарной матрицы
 import TransformMatrix as tm
 import kinterbasdb as k #@UnresolvedImport
 from datetime import datetime
 import array
 
 class DBAccess:
+  """
+  Класс - обертка для удобного доступа к БД посредством kinterbasedb
+  """
+  
   def __init__(self, DBFileName):
     """
     Конструктор. Принимает в качестве аргумента имя файла базы данных
@@ -76,9 +81,9 @@ class DBAccess:
     self.probesDict = {}
     for (dates, prim) in self.curs:
       if prim == None:
-        self.probesDict[dates] = " "
+        self.probesDict[dates.strftime('%Y-%m-%d %H:%M:%S')] = " "
       else:
-        self.probesDict[dates] = prim.decode('cp1251')
+        self.probesDict[dates.strftime('%Y-%m-%d %H:%M:%S')] = prim.decode('cp1251')
     return self.probesDict
     
   def getMatrix(self, id, probe):

@@ -254,7 +254,7 @@
       </widget>
       <widget class="QWidget" name="viewTab">
        <attribute name="title">
-        <string>Просмотр</string>
+        <string>Обработка</string>
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_4">
         <item>
@@ -353,7 +353,7 @@
     </property>
     <addaction name="actionDBOpen"/>
     <addaction name="actionDBClose"/>
-    <addaction name="actSelrctAll"/>
+    <addaction name="actSelectAll"/>
     <addaction name="actionExport"/>
     <addaction name="separator"/>
     <addaction name="actionExit"/>
@@ -413,7 +413,7 @@
     <bool>false</bool>
    </attribute>
    <addaction name="actionDBOpen"/>
-   <addaction name="actSelrctAll"/>
+   <addaction name="actSelectAll"/>
    <addaction name="actionExport"/>
    <addaction name="actionDBClose"/>
    <addaction name="actionExit"/>
@@ -486,7 +486,7 @@
     <string>Закрыть программу</string>
    </property>
   </action>
-  <action name="actSelrctAll">
+  <action name="actSelectAll">
    <property name="icon">
     <iconset resource="icons.qrc">
      <normaloff>:/icons/add_48.png</normaloff>:/icons/add_48.png</iconset>

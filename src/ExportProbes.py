@@ -51,16 +51,37 @@ class ExportProbes:
       # Иначе возвращаем пустой словарь
       return {}
 
+  def changeProbeStatus(self, id, probe, prim):
+    """
+    Добавляет/убирает указанный съем в/из списка экспорта
+    """
+    # Если пациент существует
+    if self.probesList.has_key(id):
+      # Если существует съём
+      if self.probesList[id].has_key(probe):
+        # Удаляем съём
+        del self.probesList[id][probe]
+      # Если съёма не существует
+      else:
+        # Добавляем съём
+        self.probesList[id][probe] = prim
+    # Если пациента не существует
+    else:
+      # Добавляем нового пациента
+      self.probesList[id] = {}
+      # Добавляем новый съём
+      self.probesList[id][probe] = prim
+
   def reSetProbes(self, id, probes):
     """
-    Переустанавливает список съемов пациента. Вызывать только после
-    getCheckedProbes
+    Переустанавливает список съемов пациента. 
     """
     # Очищаем съемы пациента
     self.probesList[id] = {}
     # Сохраняем все переданные съемы пациента
-    for (date, prim) in probes:
-      self.probesList[id][date] = prim
+    if probes != None:
+      for date in probes.keys():
+        self.probesList[id][date] = probes[date]
 
 if __name__ == '__main__':
   pass

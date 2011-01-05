@@ -15,7 +15,7 @@ import PlatformUtils as pu
 import platform
 import os
 
-__version__ = "0.0.5b"
+__version__ = "0.1.0"
 
 class Main(QtGui.QMainWindow):
   def __init__(self):
@@ -31,6 +31,16 @@ class Main(QtGui.QMainWindow):
     self.ui.actionDBClose.triggered.connect(self.closeDB)
     # Отобразить съемы пациента
     self.ui.trePatients.itemClicked.connect(self.listProbes)
+    # Чекнуть пациента
+    # Внимание!!! - Не очевидно.
+    # Во в момент срабатывания itemChanged так же срабатывает
+    # и itemClicked, однако itemChanged всегда отрабатывает
+    # раньше
+    self.ui.trePatients.itemChanged.connect(self.selectAllPatientProbes)
+    # Чекнуть единичный съем пациента
+    self.ui.treProbes.itemChanged.connect(self.selectProbe)
+    # Выбрать всех
+    self.ui.actSelectAll.triggered.connect(self.selectAllProbes)
     # Экспорт
     self.ui.actionExport.triggered.connect(self.exportProbes)
     # Вывести окошко 'О программе'
@@ -41,6 +51,8 @@ class Main(QtGui.QMainWindow):
     '''
     Открыть БД и отобразить список пациентов
     '''
+    # Подчищаем старые данные
+    self.closeDB()
     # Создаём новый список экспортных пациентов
     self.patLst = pr.ExportProbes()
     # Получаем имя базы в системной кодировке
@@ -65,37 +77,15 @@ class Main(QtGui.QMainWindow):
     # Очищаем элементы формы
     self.ui.treProbes.clear()
     self.ui.trePatients.clear()
-    # Удаляем список экспортных пациентов
-    del self.patLst
-    self.statusBar().showMessage(u'Готов')
+    self.ui.treExportProbes.clear()
+    # Очищаем список экспортных пациентов
+    self.patLst = None
+    self.statusBar().showMessage(u'База данных закрыта')
     
   def listProbes(self, patient):
     '''
     Отобразить съемы выбранного пациента
     '''
-    #--------------------------------------------------
-    # 1 часть: обработка и сохранение старых данных
-    #--------------------------------------------------
-    
-    # В случае, если отображение происходит не первый раз
-    id = self.patLst.getID()
-    if id != None:
-      # создаем временный список чекнутых съемов
-      tmpLst = []
-      # Сохраняем список чекнутых съемов на экспорт
-      for itemN in xrange(self.ui.treProbes.topLevelItemCount()):
-        item = self.ui.treProbes.topLevelItem(itemN)
-        if item.checkState(0):
-          tmpLst.extend([[str(item.text(0)), item.text(1)]])
-      # Сохраняем список чекнутых
-      self.patLst.reSetProbes(id, tmpLst)
-      # Перезагружаем виджет со списком экспорта
-      self.refreshExportList()
-    
-    #--------------------------------------------------
-    # 2 часть: вывод новых данных
-    #--------------------------------------------------
-    
     # Получаем Id текущего пациента из виджета списка пациентов
     id = patient.text(0)
     # Сохранить Id текущего пациента в список экспортных пациентов для
@@ -109,15 +99,57 @@ class Main(QtGui.QMainWindow):
     chkLst = self.patLst.getCheckedProbes(id)
     # Выводим полученные данные в виджет вывода съемов 
     for date in probes.keys():
-      item = QtGui.QTreeWidgetItem( [ date.strftime('%Y-%m-%d %H:%M:%S'), probes[date] ] )
+      item = QtGui.QTreeWidgetItem( [ date, probes[date] ] )
       # Если съем присутствует в списке на экспорт
-      if chkLst.has_key(date.strftime('%Y-%m-%d %H:%M:%S')):
+      if chkLst.has_key(date):
         # Отмечаем его галочкой
         item.setCheckState(0,QtCore.Qt.Checked)
       else:
         # Иначе снимаем галочку
         item.setCheckState(0,QtCore.Qt.Unchecked)
       self.ui.treProbes.addTopLevelItem(item)
+  
+  def selectAllProbes(self):
+    """
+    Отметить всех пациентов из списка пациентов, как приготовленных
+    на экспорт.
+    """
+    # Получаем список всех пациентов
+    for itemN in xrange(self.ui.trePatients.topLevelItemCount()):
+      # Получаем единичный съём 
+      item = self.ui.trePatients.topLevelItem(itemN)
+      # Отмечаем его галочкой
+      item.setCheckState(0,QtCore.Qt.Checked)
+      # Внимание!!! Далее - не очевидно.
+      # после отмечания галочкой происходит срабатывания сигнала
+      # trePatients.itemChanged и вызывается его обработчик.
+        
+  def selectAllPatientProbes(self, patient):
+    """
+    Отметить все съемы данного пациента, как приготовленные на экспорт.
+    """
+    # Получаем ID пациента
+    id = patient.text(0)
+    # Если галочку установили
+    if patient.checkState(0):
+      # Запрашиваем из базы все съемы пациента с данным Id
+      probes = base.getPatientInfo(id)
+      # Заносим все съёмы пациента в список экспорта
+      self.patLst.reSetProbes(id, probes)
+    # Если галочку сняли
+    else:
+      # Очищаем список экспорта данного пациента
+      self.patLst.reSetProbes(id, None)
+    # Перезагружаем виджет со списком экспорта
+    self.refreshExportList()
+  
+  def selectProbe(self, probe):
+    # Получаем ID текущего пациента    
+    id = self.patLst.getID()
+    # Меняем статус съема (выбран/не выбран)
+    self.patLst.changeProbeStatus(id, str(probe.text(0)), probe.text(1))
+    # Перезагружаем виджет со списком экспорта
+    self.refreshExportList()
     
   def refreshExportList(self):
     '''
@@ -192,7 +224,7 @@ class Main(QtGui.QMainWindow):
 
 def main():
   app = QtGui.QApplication(sys.argv)
-  window=Main()
+  window = Main()
   window.show()
   sys.exit(app.exec_())
 
