@@ -256,58 +256,95 @@
        <attribute name="title">
         <string>Обработка</string>
        </attribute>
-       <layout class="QVBoxLayout" name="verticalLayout_4">
-        <item>
+       <layout class="QGridLayout" name="gridLayout_2">
+        <item row="0" column="0">
          <widget class="QSplitter" name="splitter_2">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>
-          <widget class="QTreeWidget" name="treExportProbes">
-           <property name="alternatingRowColors">
-            <bool>true</bool>
-           </property>
-           <property name="rootIsDecorated">
-            <bool>false</bool>
-           </property>
-           <property name="uniformRowHeights">
-            <bool>true</bool>
-           </property>
-           <property name="sortingEnabled">
-            <bool>true</bool>
-           </property>
-           <property name="allColumnsShowFocus">
-            <bool>true</bool>
-           </property>
-           <attribute name="headerDefaultSectionSize">
-            <number>80</number>
-           </attribute>
-           <column>
-            <property name="text">
-             <string>ID</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>Ф.И.О.</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>Дата съема</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>Описание</string>
-            </property>
-           </column>
+          <widget class="QWidget" name="verticalLayoutWidget">
+           <layout class="QVBoxLayout" name="verticalLayout_4">
+            <item>
+             <widget class="QTreeWidget" name="treExportProbes">
+              <property name="alternatingRowColors">
+               <bool>true</bool>
+              </property>
+              <property name="rootIsDecorated">
+               <bool>false</bool>
+              </property>
+              <property name="uniformRowHeights">
+               <bool>true</bool>
+              </property>
+              <property name="sortingEnabled">
+               <bool>true</bool>
+              </property>
+              <property name="allColumnsShowFocus">
+               <bool>true</bool>
+              </property>
+              <attribute name="headerDefaultSectionSize">
+               <number>80</number>
+              </attribute>
+              <column>
+               <property name="text">
+                <string>ID</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Ф.И.О.</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Дата съема</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Описание</string>
+               </property>
+              </column>
+             </widget>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_4">
+              <item>
+               <widget class="QPushButton" name="btnDelElem">
+                <property name="text">
+                 <string>Удалить</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="btnClearProbes">
+                <property name="text">
+                 <string>Очистить</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <spacer name="horizontalSpacer">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
+            </item>
+           </layout>
           </widget>
           <widget class="QTabWidget" name="tabWidView">
            <property name="tabPosition">
             <enum>QTabWidget::East</enum>
            </property>
            <property name="currentIndex">
-            <number>1</number>
+            <number>3</number>
            </property>
            <widget class="QWidget" name="tabMatrix">
             <attribute name="title">
@@ -318,16 +355,22 @@
             <attribute name="title">
              <string>Сегмент</string>
             </attribute>
-            <layout class="QHBoxLayout" name="horizontalLayout_3">
-             <item>
-              <widget class="QGraphicsView" name="graphicsView"/>
-             </item>
-            </layout>
+            <layout class="QHBoxLayout" name="horizontalLayout_3"/>
            </widget>
            <widget class="QWidget" name="tabFunction">
             <attribute name="title">
              <string>Функция</string>
             </attribute>
+           </widget>
+           <widget class="QWidget" name="tab">
+            <attribute name="title">
+             <string>Графики</string>
+            </attribute>
+            <layout class="QVBoxLayout" name="verticalLayout_5">
+             <item>
+              <widget class="QwtPlot" name="qwtGraphPlot"/>
+             </item>
+            </layout>
            </widget>
           </widget>
          </widget>
@@ -344,7 +387,7 @@
      <x>0</x>
      <y>0</y>
      <width>770</width>
-     <height>22</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu">
@@ -382,10 +425,13 @@
       <string>Нормализация</string>
      </property>
      <addaction name="action_4"/>
-     <addaction name="action_1"/>
+     <addaction name="actNorm1"/>
     </widget>
     <addaction name="menu_5"/>
-    <addaction name="action_3"/>
+    <addaction name="actMaxMin"/>
+    <addaction name="actCorrelationFi"/>
+    <addaction name="actVI"/>
+    <addaction name="actIN"/>
    </widget>
    <addaction name="menu"/>
    <addaction name="menu_2"/>
@@ -395,7 +441,7 @@
   <widget class="QStatusBar" name="statusbar"/>
   <widget class="QToolBar" name="toolBarMain">
    <property name="windowTitle">
-    <string>toolBar</string>
+    <string>Главная</string>
    </property>
    <property name="iconSize">
     <size>
@@ -417,6 +463,21 @@
    <addaction name="actionExport"/>
    <addaction name="actionDBClose"/>
    <addaction name="actionExit"/>
+  </widget>
+  <widget class="QToolBar" name="toolBarInstriment">
+   <property name="windowTitle">
+    <string>Инструменты</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>BottomToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actMaxMin"/>
+   <addaction name="actCorrelationFi"/>
+   <addaction name="actVI"/>
+   <addaction name="actIN"/>
   </widget>
   <action name="actionDBOpen">
    <property name="icon">
@@ -503,7 +564,7 @@
     <string>Инструменты</string>
    </property>
   </action>
-  <action name="action_3">
+  <action name="actIN">
    <property name="text">
     <string>Индекс напряжения</string>
    </property>
@@ -519,7 +580,7 @@
     <string>Без нормализации</string>
    </property>
   </action>
-  <action name="action_1">
+  <action name="actNorm1">
    <property name="checkable">
     <bool>true</bool>
    </property>
@@ -527,7 +588,29 @@
     <string>Нормализация 1</string>
    </property>
   </action>
+  <action name="actVI">
+   <property name="text">
+    <string>Вегетативный индекс</string>
+   </property>
+  </action>
+  <action name="actMaxMin">
+   <property name="text">
+    <string>МаксМин</string>
+   </property>
+  </action>
+  <action name="actCorrelationFi">
+   <property name="text">
+    <string>Корреляция Fi</string>
+   </property>
+  </action>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QwtPlot</class>
+   <extends>QFrame</extends>
+   <header>qwt_plot.h</header>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="icons.qrc"/>
  </resources>
