@@ -3,12 +3,15 @@
 
 import sys
 from PyQt4 import QtGui, QtCore
+import PyQt4.Qt as Qt
+import PyQt4.Qwt5 as Qwt #@UnresolvedImport
 # Главное окно
 from MainForm import Ui_MainWindow
 # Класс доступа к обрабатываемой БД
 import DBInterface as db
 # Класс хранения списка съемов для обработки
 import ExportProbes as pr
+import MathFunc
 from datetime import datetime
 # Платформозависимые функции-обёртки
 import PlatformUtils as pu
@@ -45,6 +48,16 @@ class Main(QtGui.QMainWindow):
     self.ui.actionExport.triggered.connect(self.exportProbes)
     # Вывести окошко 'О программе'
     self.ui.actAboutShow.triggered.connect(self.helpAbout)
+    # Щелчёк по съему в окне экспорта
+    self.ui.treExportProbes.itemClicked.connect(self.selectExportPatient)
+    # Помечаем съем в окне экспорта
+    self.ui.treExportProbes.itemChanged.connect(self.markExportPatient)
+    # Построение графика MaxMin
+    self.ui.actMaxMin.triggered.connect(self.plotMaxMin)
+    # Постоение графика вегетативного индекса
+    self.ui.actVI.triggered.connect(self.plotVegetIndex)
+    # Разворачиваем на весь экран
+    self.showMaximized()
     self.statusBar().showMessage(u'Готов')
 
   def openDB(self):
@@ -204,8 +217,68 @@ class Main(QtGui.QMainWindow):
         tmpFile.close()
     # Информируем пользователя
     self.statusBar().showMessage(u'Экспорт прошёл успешно')
-
   
+  def selectExportPatient(self, probe):
+    '''
+    Выбрать съем из списка экспорта для обработки
+    '''
+    # Извлекаем id и дату из выбранного съема
+    id = probe.text(0)
+    date = probe.text(2)
+    # Сохраняем съем в patLst 
+    self.patLst.putProcesingProbe( (id, str(date)) )
+  
+  def markExportPatient(self, probe):
+    '''
+    Пометить/(снять метку) съем из списка экспорта для обработки
+    '''
+    pass
+    
+  def plotMaxMin(self):
+    '''
+    Постоение графика Max-min
+    '''
+    # Очищаем поле вывода графика
+    self.ui.qwtGraphPlot.clear()
+    # Присваиваем графику название
+    self.ui.qwtGraphPlot.setTitle(u'Max-Min')
+    
+    self.ui.qwtGraphPlot.setCanvasBackground(Qt.Qt.white)
+    self.ui.grid = Qwt.Qwt.QwtPlotGrid()
+    self.ui.pen = Qt.QPen(Qt.Qt.DotLine)
+    self.ui.pen.setColor(Qt.Qt.black)
+    self.ui.pen.setWidth(1)
+    self.ui.grid.setPen(self.ui.pen)
+    self.ui.grid.attach(self.ui.qwtGraphPlot)
+    # Получаем информацию съема 
+    probe = self.patLst.getProcessingProbe()
+    # Если съем не выбран
+    if probe == None:
+      # Выводим предупреждение
+      self.statusBar().showMessage(u'Пациент не выбран')
+    # В случае, если съем присутствует
+    else:
+      # Получаем матрицы съема
+      lMatr, rMatr = base.getMatrix(probe[0], probe[1])
+      # Расчитываем MaxMin для каждого полушария
+      lMaxMin = MathFunc.MaxMin(lMatr)
+      rMaxMin = MathFunc.MaxMin(rMatr)
+      # Построение графика левого полушария
+      curve = Qwt.QwtPlotCurve('Left')
+      curve.attach(self.ui.qwtGraphPlot)
+      curve.setPen(Qt.QPen(Qt.Qt.black, 2))
+      curve.setData(range(1,36), lMaxMin)
+      # Построение графика правого полушария
+      curve = Qwt.QwtPlotCurve('Right')
+      curve.attach(self.ui.qwtGraphPlot)
+      curve.setPen(Qt.QPen(Qt.Qt.black, 2, Qt.Qt.DotLine))
+      curve.setData(range(1,36), rMaxMin)
+      # Выводим график
+      self.ui.qwtGraphPlot.replot()
+
+  def plotVegetIndex(self):
+    pass
+
   def helpAbout(self):
     '''
     Отобразить окошко About

@@ -20,6 +20,7 @@ class ExportProbes:
     """
     self.probesList = {}
     self.patientID = None
+    self.processingProbe = None
         
   def putID(self, id):
     """
@@ -32,6 +33,18 @@ class ExportProbes:
     Возвращает ID текущего обрабатываемого пациента.
     """
     return self.patientID
+  
+  def putProcesingProbe(self, probe):
+    """
+    Сохранить съем из списка экспорта для обработки
+    """
+    self.processingProbe = probe
+  
+  def getProcessingProbe(self):
+    """
+    Извлеч съем из списка экспорта для обработки
+    """
+    return self.processingProbe
   
   def getAllProbes(self):
     """
