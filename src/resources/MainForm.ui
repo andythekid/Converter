@@ -262,7 +262,7 @@
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>
-          <widget class="QWidget" name="">
+          <widget class="QWidget" name="layoutWidget">
            <layout class="QVBoxLayout" name="verticalLayout_6">
             <item>
              <widget class="QTreeWidget" name="treExportProbes">
@@ -339,7 +339,7 @@
             </item>
            </layout>
           </widget>
-          <widget class="QWidget" name="">
+          <widget class="QWidget" name="layoutWidget">
            <layout class="QVBoxLayout" name="verticalLayout_4">
             <item>
              <widget class="QTabWidget" name="tabWidView">
@@ -380,14 +380,14 @@
             <item>
              <layout class="QHBoxLayout" name="horizontalLayout_4">
               <item>
-               <widget class="QPushButton" name="pushButton_2">
+               <widget class="QPushButton" name="butGarphExport">
                 <property name="text">
                  <string>Экспорт данных</string>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QPushButton" name="pushButton">
+               <widget class="QPushButton" name="butSaveImage">
                 <property name="text">
                  <string>Сохранить изображение</string>
                 </property>

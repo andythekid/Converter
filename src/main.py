@@ -18,7 +18,7 @@ import PlatformUtils as pu
 import platform
 import os
 
-__version__ = "0.1.0"
+__version__ = "0.1.2"
 
 class Main(QtGui.QMainWindow):
   def __init__(self):
@@ -52,6 +52,10 @@ class Main(QtGui.QMainWindow):
     self.ui.treExportProbes.itemClicked.connect(self.selectExportPatient)
     # Помечаем съем в окне экспорта
     self.ui.treExportProbes.itemChanged.connect(self.markExportPatient)
+    # Кнопка сохранения изображения графика
+    self.ui.butSaveImage.clicked.connect(self.saveImage)
+    # Кнопка экспорта данных графика
+    self.ui.butGarphExport.clicked.connect(self.exportGarph)
     # Построение графика MaxMin
     self.ui.actMaxMin.triggered.connect(self.plotMaxMin)
     # Постоение графика вегетативного индекса
@@ -69,19 +73,23 @@ class Main(QtGui.QMainWindow):
     # Создаём новый список экспортных пациентов
     self.patLst = pr.ExportProbes()
     # Получаем имя базы в системной кодировке
-    filename = pu.convert(QtGui.QFileDialog.getOpenFileName(self, u'Выберете файл базы данных', QtCore.QDir.homePath(), u"Базы данных (*.gdb *.GDB)"))
-    # Подключаемся к базе
-    global base
-    base = db.DBAccess(filename)
-    # Получаем список пациентов
-    patients = base.getAllPatients()
-    # Выводим его 
-    for id in patients.keys():
-      # Порядок полей: ID, ФИО, дата рождения, пол
-      item = QtGui.QTreeWidgetItem( [ str(id), patients[id][0], str(patients[id][1]), patients[id][2] ] )
-      item.setCheckState(0,QtCore.Qt.Unchecked)
-      self.ui.trePatients.addTopLevelItem(item)
-    self.statusBar().showMessage(u'База данных загружена. Найдено '+str(len(patients))+u' пациентов.')
+    filename = pu.convert(QtGui.QFileDialog.getOpenFileName(self, 
+                                                            u'Выберете файл базы данных', 
+                                                            QtCore.QDir.homePath(), 
+                                                            u"Базы данных (*.gdb *.GDB)"))
+    if filename != '':
+      # Подключаемся к базе
+      global base
+      base = db.DBAccess(filename)
+      # Получаем список пациентов
+      patients = base.getAllPatients()
+      # Выводим его 
+      for id in patients.keys():
+        # Порядок полей: ID, ФИО, дата рождения, пол
+        item = QtGui.QTreeWidgetItem( [ str(id), patients[id][0], str(patients[id][1]), patients[id][2] ] )
+        item.setCheckState(0,QtCore.Qt.Unchecked)
+        self.ui.trePatients.addTopLevelItem(item)
+      self.statusBar().showMessage(u'База данных загружена. Найдено '+str(len(patients))+u' пациентов.')
     
   def closeDB(self):
     '''
@@ -183,40 +191,42 @@ class Main(QtGui.QMainWindow):
     Экспортирование съемов
     '''
     # Запрашиваем дирректорию сохраниения съемов в системной кодировке
-    dirName = pu.convert(QtGui.QFileDialog.getExistingDirectory(self, u'Выберете дирректорию сохранения'))
-    # Получаем список съемов, приготовленнных к экспорту
-    exportLst = self.patLst.getAllProbes()
-    # Для каждого пациента в списке экспортных съемов
-    for patient in exportLst.keys():
-      # Для каждого съема конкретного пациента
-      for date in exportLst[patient].keys():
-        # Получаем дату съема
-        trueDate = datetime.strptime(date, '%Y-%m-%d %H:%M:%S')
-        # преобразуем её в строку особого вида
-        dateStr = trueDate.strftime('%Y-%m-%d-%H-%M-%S')
-        # Получаем Ф.И.О пациента в нужной кодировке
-        patientName = pu.convert(base.getPatientName(patient))
-        # Суммируем полученные ранее переменные в полное имя файла
-        fileName = os.path.join(dirName, patientName + '_' + dateStr + '.txt')
-        # Открываем файл на запись
-        tmpFile = open(fileName, "w")
-        # Получаем матрицы съема
-        lMatr, rMatr = base.getMatrix(patient, date)
-        # Пишем матрицы по очереди в файл (Формат Новосибирска)
-        for i in xrange(35):
-          for j in xrange(24):
-            tmpFile.write(str(lMatr[i][j]))
-            tmpFile.write('; ')
-          tmpFile.write('\n')
-        for i in xrange(35):
-          for j in xrange(24):
-            tmpFile.write(str(rMatr[i][j]))
-            tmpFile.write('; ')
-          tmpFile.write('\n')  
-        # Закрываем файл      
-        tmpFile.close()
-    # Информируем пользователя
-    self.statusBar().showMessage(u'Экспорт прошёл успешно')
+    dirName = pu.convert(QtGui.QFileDialog.getExistingDirectory(self, 
+                                                                u'Выберете дирректорию сохранения'))
+    if dirName != '':
+      # Получаем список съемов, приготовленнных к экспорту
+      exportLst = self.patLst.getAllProbes()
+      # Для каждого пациента в списке экспортных съемов
+      for patient in exportLst.keys():
+        # Для каждого съема конкретного пациента
+        for date in exportLst[patient].keys():
+          # Получаем дату съема
+          trueDate = datetime.strptime(date, '%Y-%m-%d %H:%M:%S')
+          # преобразуем её в строку особого вида
+          dateStr = trueDate.strftime('%Y-%m-%d-%H-%M-%S')
+          # Получаем Ф.И.О пациента в нужной кодировке
+          patientName = pu.convert(base.getPatientName(patient))
+          # Суммируем полученные ранее переменные в полное имя файла
+          fileName = os.path.join(dirName, patientName + '_' + dateStr + '.txt')
+          # Открываем файл на запись
+          tmpFile = open(fileName, "w")
+          # Получаем матрицы съема
+          lMatr, rMatr = base.getMatrix(patient, date)
+          # Пишем матрицы по очереди в файл (Формат Новосибирска)
+          for i in xrange(35):
+            for j in xrange(24):
+              tmpFile.write(str(lMatr[i][j]))
+              tmpFile.write('; ')
+            tmpFile.write('\n')
+          for i in xrange(35):
+            for j in xrange(24):
+              tmpFile.write(str(rMatr[i][j]))
+              tmpFile.write('; ')
+            tmpFile.write('\n')  
+          # Закрываем файл      
+          tmpFile.close()
+      # Информируем пользователя
+      self.statusBar().showMessage(u'Экспорт прошёл успешно')
   
   def selectExportPatient(self, probe):
     '''
@@ -231,6 +241,27 @@ class Main(QtGui.QMainWindow):
   def markExportPatient(self, probe):
     '''
     Пометить/(снять метку) съем из списка экспорта для обработки
+    '''
+    pass
+  
+  def saveImage(self):
+    '''
+    Сохранение графика в изображение
+    '''
+    # Вставить проверку открытой вкладки
+    # Получаем имя изображения в системной кодировке
+    filename = QtGui.QFileDialog.getSaveFileName(self, 
+                                                 u'Выберете файл изображения', 
+                                                 QtCore.QDir.homePath(), 
+                                                 u"Изображение (*.png *.PNG)")
+    if filename != '':
+      Qt.QPixmap.grabWidget(self.ui.qwtGraphPlot).save(filename, 'PNG')
+      # Информируем пользователя
+      self.statusBar().showMessage(u'Изображение сохранено')
+  
+  def exportGarph(self):
+    '''
+    Сохранение данных графика во внешний файл
     '''
     pass
     
@@ -266,11 +297,13 @@ class Main(QtGui.QMainWindow):
       # Построение графика левого полушария
       curve = Qwt.QwtPlotCurve('Left')
       curve.attach(self.ui.qwtGraphPlot)
+      curve.setRenderHint(Qwt.QwtPlotItem.RenderAntialiased)
       curve.setPen(Qt.QPen(Qt.Qt.black, 2))
       curve.setData(range(1,36), lMaxMin)
       # Построение графика правого полушария
       curve = Qwt.QwtPlotCurve('Right')
       curve.attach(self.ui.qwtGraphPlot)
+      curve.setRenderHint(Qwt.QwtPlotItem.RenderAntialiased)
       curve.setPen(Qt.QPen(Qt.Qt.black, 2, Qt.Qt.DotLine))
       curve.setData(range(1,36), rMaxMin)
       # Выводим график
