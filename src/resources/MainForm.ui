@@ -262,8 +262,8 @@
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>
-          <widget class="QWidget" name="verticalLayoutWidget">
-           <layout class="QVBoxLayout" name="verticalLayout_4">
+          <widget class="QWidget" name="">
+           <layout class="QVBoxLayout" name="verticalLayout_6">
             <item>
              <widget class="QTreeWidget" name="treExportProbes">
               <property name="alternatingRowColors">
@@ -307,7 +307,7 @@
              </widget>
             </item>
             <item>
-             <layout class="QHBoxLayout" name="horizontalLayout_4">
+             <layout class="QHBoxLayout" name="horizontalLayout_5">
               <item>
                <widget class="QPushButton" name="btnDelElem">
                 <property name="text">
@@ -339,39 +339,76 @@
             </item>
            </layout>
           </widget>
-          <widget class="QTabWidget" name="tabWidView">
-           <property name="tabPosition">
-            <enum>QTabWidget::East</enum>
-           </property>
-           <property name="currentIndex">
-            <number>3</number>
-           </property>
-           <widget class="QWidget" name="tabMatrix">
-            <attribute name="title">
-             <string>Матрица</string>
-            </attribute>
-           </widget>
-           <widget class="QWidget" name="tabSegment">
-            <attribute name="title">
-             <string>Сегмент</string>
-            </attribute>
-            <layout class="QHBoxLayout" name="horizontalLayout_3"/>
-           </widget>
-           <widget class="QWidget" name="tabFunction">
-            <attribute name="title">
-             <string>Функция</string>
-            </attribute>
-           </widget>
-           <widget class="QWidget" name="tab">
-            <attribute name="title">
-             <string>Графики</string>
-            </attribute>
-            <layout class="QVBoxLayout" name="verticalLayout_5">
-             <item>
-              <widget class="QwtPlot" name="qwtGraphPlot"/>
-             </item>
-            </layout>
-           </widget>
+          <widget class="QWidget" name="">
+           <layout class="QVBoxLayout" name="verticalLayout_4">
+            <item>
+             <widget class="QTabWidget" name="tabWidView">
+              <property name="tabPosition">
+               <enum>QTabWidget::East</enum>
+              </property>
+              <property name="currentIndex">
+               <number>3</number>
+              </property>
+              <widget class="QWidget" name="tabMatrix">
+               <attribute name="title">
+                <string>Матрица</string>
+               </attribute>
+              </widget>
+              <widget class="QWidget" name="tabSegment">
+               <attribute name="title">
+                <string>Сегмент</string>
+               </attribute>
+               <layout class="QHBoxLayout" name="horizontalLayout_3"/>
+              </widget>
+              <widget class="QWidget" name="tabFunction">
+               <attribute name="title">
+                <string>Функция</string>
+               </attribute>
+              </widget>
+              <widget class="QWidget" name="tab">
+               <attribute name="title">
+                <string>Графики</string>
+               </attribute>
+               <layout class="QVBoxLayout" name="verticalLayout_5">
+                <item>
+                 <widget class="QwtPlot" name="qwtGraphPlot"/>
+                </item>
+               </layout>
+              </widget>
+             </widget>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_4">
+              <item>
+               <widget class="QPushButton" name="pushButton_2">
+                <property name="text">
+                 <string>Экспорт данных</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="pushButton">
+                <property name="text">
+                 <string>Сохранить изображение</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <spacer name="horizontalSpacer_2">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
+            </item>
+           </layout>
           </widget>
          </widget>
         </item>
