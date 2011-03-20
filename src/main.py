@@ -80,16 +80,19 @@ class Main(QtGui.QMainWindow):
     if filename != '':
       # Подключаемся к базе
       global base
-      base = db.DBAccess(filename)
-      # Получаем список пациентов
-      patients = base.getAllPatients()
-      # Выводим его 
-      for id in patients.keys():
-        # Порядок полей: ID, ФИО, дата рождения, пол
-        item = QtGui.QTreeWidgetItem( [ str(id), patients[id][0], str(patients[id][1]), patients[id][2] ] )
-        item.setCheckState(0,QtCore.Qt.Unchecked)
-        self.ui.trePatients.addTopLevelItem(item)
-      self.statusBar().showMessage(u'База данных загружена. Найдено '+str(len(patients))+u' пациентов.')
+      try:
+        base = db.DBAccess(filename)
+        # Получаем список пациентов
+        patients = base.getAllPatients()
+        # Выводим его 
+        for id in patients.keys():
+          # Порядок полей: ID, ФИО, дата рождения, пол
+          item = QtGui.QTreeWidgetItem( [ str(id), patients[id][0], str(patients[id][1]), patients[id][2] ] )
+          item.setCheckState(0,QtCore.Qt.Unchecked)
+          self.ui.trePatients.addTopLevelItem(item)
+        self.statusBar().showMessage(u'База данных загружена. Найдено '+str(len(patients))+u' пациентов.')
+      except UnicodeDecodeError:
+        self.statusBar().showMessage(u'Ошибка: слишком длинный путь до базы данных.')
     
   def closeDB(self):
     '''
@@ -273,14 +276,19 @@ class Main(QtGui.QMainWindow):
     self.ui.qwtGraphPlot.clear()
     # Присваиваем графику название
     self.ui.qwtGraphPlot.setTitle(u'Max-Min')
-    
     self.ui.qwtGraphPlot.setCanvasBackground(Qt.Qt.white)
+    # grid
     self.ui.grid = Qwt.Qwt.QwtPlotGrid()
     self.ui.pen = Qt.QPen(Qt.Qt.DotLine)
     self.ui.pen.setColor(Qt.Qt.black)
     self.ui.pen.setWidth(1)
     self.ui.grid.setPen(self.ui.pen)
     self.ui.grid.attach(self.ui.qwtGraphPlot)
+    # legend
+    legend = Qwt.QwtLegend()
+    legend.setFrameStyle( Qt.QFrame.Box )
+    #legend.setItemMode(QwtLegend.ClickableItem)
+    self.ui.qwtGraphPlot.insertLegend(legend, Qwt.QwtPlot.BottomLegend)
     # Получаем информацию съема 
     probe = self.patLst.getProcessingProbe()
     # Если съем не выбран
@@ -295,13 +303,13 @@ class Main(QtGui.QMainWindow):
       lMaxMin = MathFunc.MaxMin(lMatr)
       rMaxMin = MathFunc.MaxMin(rMatr)
       # Построение графика левого полушария
-      curve = Qwt.QwtPlotCurve('Left')
+      curve = Qwt.QwtPlotCurve(u'Левое полушарие')
       curve.attach(self.ui.qwtGraphPlot)
       curve.setRenderHint(Qwt.QwtPlotItem.RenderAntialiased)
       curve.setPen(Qt.QPen(Qt.Qt.black, 2))
       curve.setData(range(1,36), lMaxMin)
       # Построение графика правого полушария
-      curve = Qwt.QwtPlotCurve('Right')
+      curve = Qwt.QwtPlotCurve(u'Правое полушарие')
       curve.attach(self.ui.qwtGraphPlot)
       curve.setRenderHint(Qwt.QwtPlotItem.RenderAntialiased)
       curve.setPen(Qt.QPen(Qt.Qt.black, 2, Qt.Qt.DotLine))
