@@ -86,6 +86,24 @@ class DBAccess:
         self.probesDict[dates.strftime('%Y-%m-%d %H:%M:%S')] = prim.decode('cp1251')
     return self.probesDict
     
+  def getPatientInfoDate(self, id):
+    """
+    Принимает ID пациента, возвращает массив съемов пациента с заданным ID, разбитый по дате
+    """
+    SELECT = r"SELECT dates, prim FROM data WHERE id = '" + str(id) + r"'"
+    self.curs.execute(SELECT)
+    self.probesDict = {}
+    for (dates, prim) in self.curs:
+      # Если не существует подсловаря с нужной датой 
+      if not self.probesDict.has_key(dates.strftime('%Y-%m-%d')):
+        # Создаём его
+        self.probesDict[dates.strftime('%Y-%m-%d')] = {}
+      if prim == None:
+        self.probesDict[dates.strftime('%Y-%m-%d')][dates.strftime('%Y-%m-%d %H:%M:%S')] = " "
+      else:
+        self.probesDict[dates.strftime('%Y-%m-%d')][dates.strftime('%Y-%m-%d %H:%M:%S')] = prim.decode('cp1251')
+    return self.probesDict
+    
   def getMatrix(self, id, probe):
     """
     Принимает ид пациента и съема, возвращает матрицы левого и правого полушарий.

@@ -118,7 +118,7 @@ class Ui_MainWindow(object):
         self.trePatients.header().setDefaultSectionSize(60)
         self.treProbes = QtGui.QTreeWidget(self.splitter)
         self.treProbes.setAlternatingRowColors(True)
-        self.treProbes.setRootIsDecorated(False)
+        #self.treProbes.setRootIsDecorated(False)
         self.treProbes.setUniformRowHeights(True)
         self.treProbes.setAllColumnsShowFocus(True)
         self.treProbes.setObjectName("treProbes")
