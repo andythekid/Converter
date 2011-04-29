@@ -29,6 +29,8 @@ def MaxMin(segMatrx):
         min = segMatrx[func][ampl]
     # Заносим разницу max-min в результирующую матрицу
     rezMatrix[func] = max - min
+  # Переворачиваем список, чтобы он начинался с F1-1
+  rezMatrix.reverse()
   # Возвращаем результат
   return rezMatrix
 
@@ -40,7 +42,7 @@ def VegetIndex(lMaxMin, rMaxMin):
   """
   # Создаём пустой список разностных функций
   mod = [None for x in xrange(len(lMaxMin))] #@UnusedVariable
-  # Для каждого Fi берём разность левого и правого полушария по модулю 
+  # Для каждого Fi берём разность левого и правого полушария по модулю
   for i in xrange(len(lMaxMin)):
     mod[i] = abs(lMaxMin[i] - rMaxMin[i])
   # Разбиваем разностный список на 2 равные части, исключая 18 элемент (F4-3)
@@ -55,4 +57,4 @@ def VegetIndex(lMaxMin, rMaxMin):
   # симпатической и парасимпатической систем.
   VI = S1/(S2 + 0.01)
   return VI
-      
+

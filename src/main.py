@@ -20,6 +20,26 @@ import os
 
 __version__ = "0.1.4"
 
+class TextScaleDraw(Qwt.QwtScaleDraw):
+  def __init__(self, labelStrings, *args):
+    """
+    Initialize text scale draw with label strings and any other arguments that
+    """
+    Qwt.QwtScaleDraw.__init__(self, *args)
+    self.labelStrings=labelStrings
+
+  # __init__()
+
+  def label(self, value):
+    """
+    Apply the label at location 'value' .  Since this class is to be used for BarPlots
+    or LinePlots, every item in 'value' should be an integer.
+    """
+    label=Qt.QString(self.labelStrings[int(value)])
+    return Qwt.QwtText(label)
+
+# TEXTSCALE DRAW END
+
 class Main(QtGui.QMainWindow):
   def __init__(self):
     QtGui.QMainWindow.__init__(self)
@@ -301,6 +321,14 @@ class Main(QtGui.QMainWindow):
     '''
     Постоение графика Max-min
     '''
+    funcLabel = [ '1-1','1-2', '1-3', '1-4', '1-5',
+                  '2-1','2-2', '2-3', '2-4', '2-5',
+                  '3-1','3-2', '3-3', '3-4', '3-5',
+                  '4-1','4-2', '4-3', '4-4', '4-5',
+                  '5-1','5-2', '5-3', '5-4', '5-5',
+                  '6-1','6-2', '6-3', '6-4', '6-5',
+                  '7-1','7-2', '7-3', '7-4', '7-5']
+
     # Очищаем поле вывода графика
     self.ui.qwtGraphPlot.clear()
     # Присваиваем графику название
@@ -318,6 +346,11 @@ class Main(QtGui.QMainWindow):
     legend.setFrameStyle(Qt.QFrame.Box)
     #legend.setItemMode(QwtLegend.ClickableItem)
     self.ui.qwtGraphPlot.insertLegend(legend, Qwt.QwtPlot.BottomLegend)
+    # Axis
+    self.ui.qwtGraphPlot.setAxisScaleDraw(
+      Qwt.QwtPlot.xBottom, TextScaleDraw(funcLabel))
+    self.ui.qwtGraphPlot.setAxisMaxMajor(Qwt.QwtPlot.xBottom, 35)
+    self.ui.qwtGraphPlot.setAxisMaxMinor(Qwt.QwtPlot.xBottom, 0)
     # Получаем информацию съема
     probe = self.patLst.getProcessingProbe()
     # Если съем не выбран
@@ -335,14 +368,14 @@ class Main(QtGui.QMainWindow):
       curve = Qwt.QwtPlotCurve(u'Левое полушарие')
       curve.attach(self.ui.qwtGraphPlot)
       curve.setRenderHint(Qwt.QwtPlotItem.RenderAntialiased)
-      curve.setPen(Qt.QPen(Qt.Qt.black, 2))
-      curve.setData(range(1, 36), lMaxMin)
+      curve.setPen(Qt.QPen(Qt.Qt.black, 2, Qt.Qt.DotLine))
+      curve.setData(range(0, 35), lMaxMin)
       # Построение графика правого полушария
       curve = Qwt.QwtPlotCurve(u'Правое полушарие')
       curve.attach(self.ui.qwtGraphPlot)
       curve.setRenderHint(Qwt.QwtPlotItem.RenderAntialiased)
-      curve.setPen(Qt.QPen(Qt.Qt.black, 2, Qt.Qt.DotLine))
-      curve.setData(range(1, 36), rMaxMin)
+      curve.setPen(Qt.QPen(Qt.Qt.black, 2))
+      curve.setData(range(0, 35), rMaxMin)
       # Выводим график
       self.ui.qwtGraphPlot.replot()
 
