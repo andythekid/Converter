@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'MainForm.ui'
 #
-# Created: Sun Jan 23 19:36:44 2011
-#      by: PyQt4 UI code generator 4.7.4
+# Created: Tue May 03 15:51:33 2011
+#      by: PyQt4 UI code generator 4.5.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -67,9 +67,9 @@ class Ui_MainWindow(object):
         self.horizontalLayout.addWidget(self.lblSex)
         self.cmbSex = QtGui.QComboBox(self.groupBox)
         self.cmbSex.setObjectName("cmbSex")
-        self.cmbSex.addItem("")
-        self.cmbSex.addItem("")
-        self.cmbSex.addItem("")
+        self.cmbSex.addItem(QtCore.QString())
+        self.cmbSex.addItem(QtCore.QString())
+        self.cmbSex.addItem(QtCore.QString())
         self.horizontalLayout.addWidget(self.cmbSex)
         self.verticalLayout.addLayout(self.horizontalLayout)
         self.horizontalLayout_2 = QtGui.QHBoxLayout()
@@ -118,7 +118,8 @@ class Ui_MainWindow(object):
         self.trePatients.header().setDefaultSectionSize(60)
         self.treProbes = QtGui.QTreeWidget(self.splitter)
         self.treProbes.setAlternatingRowColors(True)
-        #self.treProbes.setRootIsDecorated(False)
+        self.treProbes.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
+        self.treProbes.setRootIsDecorated(True)
         self.treProbes.setUniformRowHeights(True)
         self.treProbes.setAllColumnsShowFocus(True)
         self.treProbes.setObjectName("treProbes")
@@ -138,6 +139,7 @@ class Ui_MainWindow(object):
         self.verticalLayout_6.setObjectName("verticalLayout_6")
         self.treExportProbes = QtGui.QTreeWidget(self.layoutWidget)
         self.treExportProbes.setAlternatingRowColors(True)
+        self.treExportProbes.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
         self.treExportProbes.setRootIsDecorated(False)
         self.treExportProbes.setUniformRowHeights(True)
         self.treExportProbes.setAllColumnsShowFocus(True)
@@ -169,15 +171,23 @@ class Ui_MainWindow(object):
         self.tabSegment.setObjectName("tabSegment")
         self.horizontalLayout_3 = QtGui.QHBoxLayout(self.tabSegment)
         self.horizontalLayout_3.setObjectName("horizontalLayout_3")
+        self.qwtSegPlot = Qwt5.QwtPlot(self.tabSegment)
+        self.qwtSegPlot.setObjectName("qwtSegPlot")
+        self.horizontalLayout_3.addWidget(self.qwtSegPlot)
         self.tabWidView.addTab(self.tabSegment, "")
         self.tabFunction = QtGui.QWidget()
         self.tabFunction.setObjectName("tabFunction")
+        self.horizontalLayout_6 = QtGui.QHBoxLayout(self.tabFunction)
+        self.horizontalLayout_6.setObjectName("horizontalLayout_6")
+        self.qwtFuncPlot = Qwt5.QwtPlot(self.tabFunction)
+        self.qwtFuncPlot.setObjectName("qwtFuncPlot")
+        self.horizontalLayout_6.addWidget(self.qwtFuncPlot)
         self.tabWidView.addTab(self.tabFunction, "")
         self.tab = QtGui.QWidget()
         self.tab.setObjectName("tab")
         self.verticalLayout_5 = QtGui.QVBoxLayout(self.tab)
         self.verticalLayout_5.setObjectName("verticalLayout_5")
-        self.qwtGraphPlot = QwtPlot(self.tab)
+        self.qwtGraphPlot = Qwt5.QwtPlot(self.tab)
         self.qwtGraphPlot.setObjectName("qwtGraphPlot")
         self.verticalLayout_5.addWidget(self.qwtGraphPlot)
         self.tabWidView.addTab(self.tab, "")
@@ -198,7 +208,7 @@ class Ui_MainWindow(object):
         self.verticalLayout_2.addWidget(self.tabWidMain)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 770, 20))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 770, 21))
         self.menubar.setObjectName("menubar")
         self.menu = QtGui.QMenu(self.menubar)
         self.menu.setObjectName("menu")
@@ -218,10 +228,10 @@ class Ui_MainWindow(object):
         self.toolBarMain.setIconSize(QtCore.QSize(34, 34))
         self.toolBarMain.setToolButtonStyle(QtCore.Qt.ToolButtonTextBesideIcon)
         self.toolBarMain.setObjectName("toolBarMain")
-        MainWindow.addToolBar(QtCore.Qt.ToolBarArea(QtCore.Qt.TopToolBarArea), self.toolBarMain)
+        MainWindow.addToolBar(QtCore.Qt.TopToolBarArea, self.toolBarMain)
         self.toolBarInstriment = QtGui.QToolBar(MainWindow)
         self.toolBarInstriment.setObjectName("toolBarInstriment")
-        MainWindow.addToolBar(QtCore.Qt.ToolBarArea(QtCore.Qt.BottomToolBarArea), self.toolBarInstriment)
+        MainWindow.addToolBar(QtCore.Qt.BottomToolBarArea, self.toolBarInstriment)
         self.actionDBOpen = QtGui.QAction(MainWindow)
         icon1 = QtGui.QIcon()
         icon1.addPixmap(QtGui.QPixmap(":/icons/database_add_48.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
@@ -376,5 +386,5 @@ class Ui_MainWindow(object):
         self.actMaxMin.setText(QtGui.QApplication.translate("MainWindow", "МаксМин", None, QtGui.QApplication.UnicodeUTF8))
         self.actCorrelationFi.setText(QtGui.QApplication.translate("MainWindow", "Корреляция Fi", None, QtGui.QApplication.UnicodeUTF8))
 
-from PyQt4.Qwt5 import QwtPlot
+from PyQt4 import Qwt5
 import icons_rc

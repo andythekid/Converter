@@ -34,6 +34,25 @@ def MaxMin(segMatrx):
   # Возвращаем результат
   return rezMatrix
 
+def Segment(Matrix):
+  """
+  Получение значений сегментов
+  """
+  segments = ['C1', 'C2-3', 'C4-5', 'C6', 'C7-8',
+              'Th1','Th2', 'Th3-4', 'Th5', 'Th6',
+              'Th7', 'Th8-9', 'Th10', 'Th11', 'Th12',
+              'L1', 'L2', 'L3', 'L4', 'L5',
+              'S1', 'S2', 'S3-4', 'K-S5']
+  # Объявляем пустой словарь результирующих элементов
+  rezult = {}
+  for s in xrange(len(segments)):
+    tmp = []
+    for i in xrange(0, 35):
+      tmp.append(Matrix[i][s])
+    tmp.reverse()
+    rezult[segments[s]] = tmp
+  return rezult
+
 def VegetIndex(lMaxMin, rMaxMin):
   """
   Расчет вегетативного индекса.

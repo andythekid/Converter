@@ -12,22 +12,24 @@ import DBInterface as db
 # Класс хранения списка съемов для обработки
 import ExportProbes as pr
 import MathFunc
-from datetime import datetime
+import datetime
 # Платформозависимые функции-обёртки
 import PlatformUtils as pu
 import platform
 import os
 
-__version__ = "0.1.4"
+__version__ = "0.1.5"
 
 class TextScaleDraw(Qwt.QwtScaleDraw):
+  """
+  Класс для отрисовки Axis-a Qwt, переданного в форме строки
+  """
   def __init__(self, labelStrings, *args):
     """
     Initialize text scale draw with label strings and any other arguments that
     """
     Qwt.QwtScaleDraw.__init__(self, *args)
-    self.labelStrings=labelStrings
-
+    self.labelStrings = labelStrings
   # __init__()
 
   def label(self, value):
@@ -35,8 +37,9 @@ class TextScaleDraw(Qwt.QwtScaleDraw):
     Apply the label at location 'value' .  Since this class is to be used for BarPlots
     or LinePlots, every item in 'value' should be an integer.
     """
-    label=Qt.QString(self.labelStrings[int(value)])
+    label = Qt.QString(self.labelStrings[int(value)])
     return Qwt.QwtText(label)
+  # label()
 
 # TEXTSCALE DRAW END
 
@@ -68,22 +71,28 @@ class Main(QtGui.QMainWindow):
     self.ui.actionExport.triggered.connect(self.exportProbes)
     # Вывести окошко 'О программе'
     self.ui.actAboutShow.triggered.connect(self.helpAbout)
+    # Выбор таба графика
+    self.ui.tabWidView.currentChanged.connect(self.changeTab)
     # Щелчёк по съему в окне экспорта
     self.ui.treExportProbes.itemClicked.connect(self.selectExportPatient)
-    # Помечаем съем в окне экспорта
-    self.ui.treExportProbes.itemChanged.connect(self.markExportPatient)
+    # Кнопка "Удалить" в окне экспорта
+    self.ui.btnDelElem.clicked.connect(self.delExportItems)
     # Кнопка "Очистить" в окне экспорта
     self.ui.btnClearProbes.clicked.connect(self.clearExport)
     # Кнопка сохранения изображения графика
     self.ui.butSaveImage.clicked.connect(self.saveImage)
     # Кнопка экспорта данных графика
     self.ui.butGarphExport.clicked.connect(self.exportGarph)
+    # Отображение графиков по щелчку на легенде
+    self.ui.qwtSegPlot.legendChecked.connect(self.showCurve)
     # Построение графика MaxMin
     self.ui.actMaxMin.triggered.connect(self.plotMaxMin)
     # Постоение графика вегетативного индекса
     self.ui.actVI.triggered.connect(self.plotVegetIndex)
     # Разворачиваем на весь экран
     self.showMaximized()
+    self.graphTab = 'graph'
+    self.groupVI = False
     self.statusBar().showMessage(u'Готов')
 
   def openDB(self):
@@ -120,6 +129,7 @@ class Main(QtGui.QMainWindow):
     '''
     Закрыть БД
     '''
+    base = None
     # Очищаем элементы формы
     self.ui.treProbes.clear()
     self.ui.trePatients.clear()
@@ -181,6 +191,7 @@ class Main(QtGui.QMainWindow):
       # Внимание!!! Далее - не очевидно.
       # после отмечания галочкой происходит срабатывания сигнала
       # trePatients.itemChanged и вызывается его обработчик.
+    # selectAllProbes()
 
   def selectAllPatientProbes(self, patient):
     """
@@ -200,8 +211,12 @@ class Main(QtGui.QMainWindow):
       self.patLst.reSetProbes(id, None)
     # Перезагружаем виджет со списком экспорта
     self.refreshExportList()
+    # selectAllPatientProbes()
 
   def selectProbe(self, probe):
+    """
+    Отметить единичный элемент в дереве съёмов
+    """
     # Если элемент является съёмом
     if probe.childCount() == 0:
       # Получаем ID текущего пациента
@@ -212,9 +227,13 @@ class Main(QtGui.QMainWindow):
       self.refreshExportList()
     # Если элемент является группой съёмов
     else:
+      # Получаем свежеустановленный статус (отмечено/снято)
       state = probe.checkState(0)
+      # Для всех потомков поддерева
       for i in xrange(probe.childCount()):
+        # Устанавливаем тот же статус
         probe.child(i).setCheckState(0, state)
+    # selectProbe()
 
   def refreshExportList(self):
     '''
@@ -225,10 +244,12 @@ class Main(QtGui.QMainWindow):
     # Получаем список съемов, приготовленнных к экспорту
     exportLst = self.patLst.getAllProbes()
     # Выводим экспортные съёмы
-    for patient in exportLst.keys():
-      for date in exportLst[patient].keys():
-        item = QtGui.QTreeWidgetItem([patient, base.getPatientName(patient), date, exportLst[patient][date] ])
-        self.ui.treExportProbes.addTopLevelItem(item)
+    if exportLst:
+      for patient in exportLst.keys():
+        for date in exportLst[patient].keys():
+          item = QtGui.QTreeWidgetItem([patient, base.getPatientName(patient), date, exportLst[patient][date] ])
+          self.ui.treExportProbes.addTopLevelItem(item)
+    # refreshExportList()
 
   def exportProbes(self):
     '''
@@ -245,7 +266,7 @@ class Main(QtGui.QMainWindow):
         # Для каждого съема конкретного пациента
         for date in exportLst[patient].keys():
           # Получаем дату съема
-          trueDate = datetime.strptime(date, '%Y-%m-%d %H:%M:%S')
+          trueDate = datetime.datetime.strptime(date, '%Y-%m-%d %H:%M:%S')
           # преобразуем её в строку особого вида
           dateStr = trueDate.strftime('%Y-%m-%d-%H-%M-%S')
           # Получаем Ф.И.О пациента в нужной кодировке
@@ -271,27 +292,32 @@ class Main(QtGui.QMainWindow):
           tmpFile.close()
       # Информируем пользователя
       self.statusBar().showMessage(u'Экспорт прошёл успешно')
+    # exportProbes()
 
   def selectExportPatient(self, probe):
     '''
     Выбрать съем из списка экспорта для обработки
     '''
-    # Извлекаем id и дату из выбранного съема
-    id = probe.text(0)
-    date = probe.text(2)
-    # Сохраняем съем в patLst
-    self.patLst.putProcesingProbe((id, str(date)))
-
-  def markExportPatient(self, probe):
-    '''
-    Пометить/(снять метку) съем из списка экспорта для обработки
-    '''
-    pass
+    if self.graphTab == 'seg':
+      self.plotSegment()
+    elif self.graphTab == 'func':
+      pass
+    elif self.graphTab == 'graph':
+      pass
+#    elif self.graphTab == 'matr':    
+    # selectExportPatient()
 
   def saveImage(self):
     '''
     Сохранение графика в изображение
     '''
+    if self.graphTab == 'seg':
+      plot = self.ui.qwtSegPlot
+    elif self.graphTab == 'func':
+      plot = self.ui.qwtFuncPlot
+    elif self.graphTab == 'graph':
+      plot = self.ui.qwtGraphPlot
+#    elif self.graphTab == 'matr':
     # Вставить проверку открытой вкладки
     # Получаем имя изображения в системной кодировке
     filename = QtGui.QFileDialog.getSaveFileName(self,
@@ -299,7 +325,7 @@ class Main(QtGui.QMainWindow):
                                                  QtCore.QDir.homePath(),
                                                  u"Изображение (*.png *.PNG)")
     if filename != '':
-      Qt.QPixmap.grabWidget(self.ui.qwtGraphPlot).save(filename, 'PNG')
+      Qt.QPixmap.grabWidget(plot).save(filename, 'PNG')
       # Информируем пользователя
       self.statusBar().showMessage(u'Изображение сохранено')
 
@@ -309,6 +335,53 @@ class Main(QtGui.QMainWindow):
     '''
     pass
 
+  def delExportItems(self):
+    '''
+    Удаление выделенных элементов списка экспорта
+    '''
+    if not self.ui.treExportProbes.selectedIndexes():
+      return
+    # Удаляем выбранные итемы
+    for index in self.ui.treExportProbes.selectedItems():
+      self.patLst.changeProbeStatus(index.text(0), str(index.text(2)), index.text(3))
+    # Перезагружаем виджет со списком экспорта
+    self.refreshExportList()
+  # delExportItems()
+
+  def changeTab(self):
+    """
+    Смена таба с графиком
+    """
+    if self.ui.tabWidView.currentIndex() == 1:
+      self.graphTab = 'seg'
+      self.plotSegment()
+    if self.ui.tabWidView.currentIndex() == 2:
+      self.graphTab = 'func'
+    if self.ui.tabWidView.currentIndex() == 0:
+      self.graphTab = 'matr'
+    if self.ui.tabWidView.currentIndex() == 3:
+      self.graphTab = 'graph'
+
+  #changeTab()
+
+  def showCurve(self, item, on):
+    """
+    Включить/отключить отображение графика
+    """
+    if self.graphTab == 'seg':
+      plot = self.ui.qwtSegPlot
+    elif self.graphTab == 'func':
+      plot = self.ui.qwtFuncPlot
+    else:
+      return
+    item.setVisible(on)
+    widget = plot.legend().find(item)
+    if isinstance(widget, Qwt.Qwt.QwtLegendItem):
+      widget.setChecked(on)
+    plot.replot()
+
+  # showCurve()
+
   def clearExport(self):
     '''
     Очистка списка экспорта
@@ -316,19 +389,30 @@ class Main(QtGui.QMainWindow):
     self.ui.treExportProbes.clear()
     # Создаём новый список экспортных пациентов
     self.patLst = pr.ExportProbes()
+    # clearExport()
 
   def plotMaxMin(self):
     '''
     Постоение графика Max-min
     '''
-    funcLabel = [ '1-1','1-2', '1-3', '1-4', '1-5',
-                  '2-1','2-2', '2-3', '2-4', '2-5',
-                  '3-1','3-2', '3-3', '3-4', '3-5',
-                  '4-1','4-2', '4-3', '4-4', '4-5',
-                  '5-1','5-2', '5-3', '5-4', '5-5',
-                  '6-1','6-2', '6-3', '6-4', '6-5',
-                  '7-1','7-2', '7-3', '7-4', '7-5']
+    funcLabel = [ '1', '2', '3<p>F1', '4', '5',
+                  '1', '2', '3<p>F2', '4', '5',
+                  '1', '2', '3<p>F3', '4', '5',
+                  '1', '2', '3<p>F4', '4', '5',
+                  '1', '2', '3<p>F5', '4', '5',
+                  '1', '2', '3<p>F6', '4', '5',
+                  '1', '2', '3<p>F7', '4', '5', ]
 
+    # Если выделена не однастрока (4 поля)
+    if len(self.ui.treExportProbes.selectedIndexes()) != 4:
+      self.statusBar().showMessage(u'Пациент не выбран')
+      return
+    for index in self.ui.treExportProbes.selectedItems():
+      # Получаем матрицы съема
+      lMatr, rMatr = base.getMatrix(index.text(0), str(index.text(2)))
+    # Расчитываем MaxMin для каждого полушария
+    lMaxMin = MathFunc.MaxMin(lMatr)
+    rMaxMin = MathFunc.MaxMin(rMatr)
     # Очищаем поле вывода графика
     self.ui.qwtGraphPlot.clear()
     # Присваиваем графику название
@@ -341,46 +425,309 @@ class Main(QtGui.QMainWindow):
     self.ui.pen.setWidth(1)
     self.ui.grid.setPen(self.ui.pen)
     self.ui.grid.attach(self.ui.qwtGraphPlot)
+    # markers (Вертикальны разделители)
+    self.ui.m1 = m1 = Qwt.Qwt.QwtPlotMarker()
+    m1.setValue(4.0, 0.0)
+    m1.setLineStyle(Qwt.Qwt.QwtPlotMarker.VLine)
+    m1.setLinePen(Qt.QPen(Qt.Qt.black))
+    m1.attach(self.ui.qwtGraphPlot)
+    self.ui.m2 = m2 = Qwt.Qwt.QwtPlotMarker()
+    m2.setValue(9.0, 0.0)
+    m2.setLineStyle(Qwt.Qwt.QwtPlotMarker.VLine)
+    m2.setLinePen(Qt.QPen(Qt.Qt.black))
+    m2.attach(self.ui.qwtGraphPlot)
+    self.ui.m3 = m3 = Qwt.Qwt.QwtPlotMarker()
+    m3.setValue(14.0, 0.0)
+    m3.setLineStyle(Qwt.Qwt.QwtPlotMarker.VLine)
+    m3.setLinePen(Qt.QPen(Qt.Qt.black))
+    m3.attach(self.ui.qwtGraphPlot)
+    self.ui.m4 = m4 = Qwt.Qwt.QwtPlotMarker()
+    m4.setValue(19.0, 0.0)
+    m4.setLineStyle(Qwt.Qwt.QwtPlotMarker.VLine)
+    m4.setLinePen(Qt.QPen(Qt.Qt.black))
+    m4.attach(self.ui.qwtGraphPlot)
+    self.ui.m5 = m5 = Qwt.Qwt.QwtPlotMarker()
+    m5.setValue(24.0, 0.0)
+    m5.setLineStyle(Qwt.Qwt.QwtPlotMarker.VLine)
+    m5.setLinePen(Qt.QPen(Qt.Qt.black))
+    m5.attach(self.ui.qwtGraphPlot)
+    self.ui.m6 = m6 = Qwt.Qwt.QwtPlotMarker()
+    m6.setValue(29.0, 0.0)
+    m6.setLineStyle(Qwt.Qwt.QwtPlotMarker.VLine)
+    m6.setLinePen(Qt.QPen(Qt.Qt.black))
+    m6.attach(self.ui.qwtGraphPlot)
     # legend
     legend = Qwt.QwtLegend()
     legend.setFrameStyle(Qt.QFrame.Box)
-    #legend.setItemMode(QwtLegend.ClickableItem)
     self.ui.qwtGraphPlot.insertLegend(legend, Qwt.QwtPlot.BottomLegend)
     # Axis
     self.ui.qwtGraphPlot.setAxisScaleDraw(
       Qwt.QwtPlot.xBottom, TextScaleDraw(funcLabel))
     self.ui.qwtGraphPlot.setAxisMaxMajor(Qwt.QwtPlot.xBottom, 35)
     self.ui.qwtGraphPlot.setAxisMaxMinor(Qwt.QwtPlot.xBottom, 0)
-    # Получаем информацию съема
-    probe = self.patLst.getProcessingProbe()
-    # Если съем не выбран
-    if probe == None:
-      # Выводим предупреждение
-      self.statusBar().showMessage(u'Пациент не выбран')
-    # В случае, если съем присутствует
-    else:
+    self.ui.qwtGraphPlot.setAxisAutoScale(Qwt.Qwt.QwtPlot.yLeft)
+    # Построение графика левого полушария
+    curve = Qwt.QwtPlotCurve(u'Левое полушарие')
+    curve.attach(self.ui.qwtGraphPlot)
+    curve.setRenderHint(Qwt.QwtPlotItem.RenderAntialiased)
+    curve.setPen(Qt.QPen(Qt.Qt.black, 2, Qt.Qt.DotLine))
+    curve.setData(range(0, 35), lMaxMin)
+    # Построение графика правого полушария
+    curve = Qwt.QwtPlotCurve(u'Правое полушарие')
+    curve.attach(self.ui.qwtGraphPlot)
+    curve.setRenderHint(Qwt.QwtPlotItem.RenderAntialiased)
+    curve.setPen(Qt.QPen(Qt.Qt.black, 2))
+    curve.setData(range(0, 35), rMaxMin)
+    # Выводим график
+    self.ui.qwtGraphPlot.replot()
+    # plotMaxMin()
+
+  def plotVegetIndex(self):
+    """
+    Построение вегетативного индекса (ВИ)
+    """
+    if not self.ui.treExportProbes.selectedIndexes():
+      return
+    srcVI = []
+    rezVI = []
+    rezDat = []
+    # Перебираем все выделенные item-ы
+    for index in self.ui.treExportProbes.selectedItems():
       # Получаем матрицы съема
-      lMatr, rMatr = base.getMatrix(probe[0], probe[1])
+      lMatr, rMatr = base.getMatrix(index.text(0), str(index.text(2)))
       # Расчитываем MaxMin для каждого полушария
       lMaxMin = MathFunc.MaxMin(lMatr)
       rMaxMin = MathFunc.MaxMin(rMatr)
-      # Построение графика левого полушария
-      curve = Qwt.QwtPlotCurve(u'Левое полушарие')
-      curve.attach(self.ui.qwtGraphPlot)
-      curve.setRenderHint(Qwt.QwtPlotItem.RenderAntialiased)
-      curve.setPen(Qt.QPen(Qt.Qt.black, 2, Qt.Qt.DotLine))
-      curve.setData(range(0, 35), lMaxMin)
-      # Построение графика правого полушария
-      curve = Qwt.QwtPlotCurve(u'Правое полушарие')
-      curve.attach(self.ui.qwtGraphPlot)
-      curve.setRenderHint(Qwt.QwtPlotItem.RenderAntialiased)
-      curve.setPen(Qt.QPen(Qt.Qt.black, 2))
-      curve.setData(range(0, 35), rMaxMin)
-      # Выводим график
-      self.ui.qwtGraphPlot.replot()
+      # Расчитываем ВИ и заносим его в список исходных ВИ
+      VI = MathFunc.VegetIndex(lMaxMin, rMaxMin)
+      srcVI.append([index.text(2), VI]) #extend
+    # Сортируем по дате
+    srcVI.sort()
+    # Если выставлена группировка индексов по времени и дате
+    if self.groupVI:
+      # Номер группы
+      group = 0
+      # Число индексов в группе
+      div = 1
+      # Предыдущий обрабатываемый ВИ
+      oldVI = 0
+      for i in xrange(len(srcVI)):
+        # Если первый элемент в массиве
+        # то добавляем его в первую группу
+        if oldVI == 0:
+          rezVI.append(srcVI[i][1])
+          rezDat.append(srcVI[i][0])
+        else:
+          d1 = datetime.datetime.strptime(str(srcVI[i][0]), '%Y-%m-%d %H:%M:%S')
+          d2 = datetime.datetime.strptime(str(oldVI[0]), '%Y-%m-%d %H:%M:%S')
+          diff = d1 - d2
+          # Если разница по времени между съемами >= 7 минут (3 мин на
+          # съем и 3 на тупняк между съемами)
+          if diff.seconds / 60 >= 7:
+            # Делим уже сложенные ВИ на их количество
+            rezVI[group] = rezVI[group] / div
+            # Формируем красивую дату с числом индексов
+            d1 = datetime.datetime.strptime(str(rezDat[group]), '%Y-%m-%d %H:%M:%S')
+            rezDat[group] = d1.strftime('%d.%m.%y %H:%M ') + '(' + str(div) + ')'
+            # Добавляем текущий индекс в новую группу
+            group = group + 1
+            rezVI.append(srcVI[i][1])
+            rezDat.append(srcVI[i][0])
+            div = 1
+          # Иначе суммируем текущий индекс с существующей суммой
+          else:
+            rezVI[group] = rezVI[group] + srcVI[i][1]
+            div = div + 1
+        oldVI = srcVI[i]
+      # Завершающий расчёт
+      else:
+        # Делим уже сложенные ВИ на их количество
+        rezVI[group] = rezVI[group] / div
+        # Формируем красивую дату с числом индексов
+        d1 = datetime.datetime.strptime(str(rezDat[group]), '%Y-%m-%d %H:%M:%S')
+        rezDat[group] = d1.strftime('%d.%m.%y %H:%M ') + '(' + str(div) + ')'
+    # Если группировка не выставлена
+    else:
+      for i in xrange(len(srcVI)):
+        rezVI.append(srcVI[i][1])
+        d1 = datetime.datetime.strptime(str(srcVI[i][0]), '%Y-%m-%d %H:%M:%S')
+        rezDat.append(d1.strftime('%d.%m.%y %H:%M '))
+    # Расчёт среднего ВИ (отрисовывается отдельно)
+    sum = 0
+    for i in xrange(len(rezVI)):
+      sum = sum + rezVI[i]
+    mean = sum / float(len(rezVI))
+    # Расчёт максимального ВИ + 20%(для масштабирования)
+    maxVI = 0
+    for i in rezVI:
+      if i > maxVI:
+        maxVI = i
+    if maxVI < 2.5:
+      maxVI = 2.5
+    maxVI = maxVI + maxVI * 0.2
+    # Построение графика ВИ
+    # Очищаем поле вывода графика
+    self.ui.qwtGraphPlot.clear()
+    # Присваиваем графику название
+    self.ui.qwtGraphPlot.setTitle(u'Вегетативный индекс')
+    self.ui.qwtGraphPlot.setCanvasBackground(Qt.Qt.white)
+    # grid
+    self.ui.grid = Qwt.Qwt.QwtPlotGrid()
+    self.ui.pen = Qt.QPen(Qt.Qt.DotLine)
+    self.ui.pen.setColor(Qt.Qt.black)
+    self.ui.pen.setWidth(1)
+    self.ui.grid.setPen(self.ui.pen)
+    self.ui.grid.attach(self.ui.qwtGraphPlot)
+    # Legend
+    # Axis
+    self.ui.qwtGraphPlot.setAxisScaleDraw(
+      Qwt.QwtPlot.xBottom, TextScaleDraw(rezDat))
+    self.ui.qwtGraphPlot.setAxisMaxMajor(Qwt.QwtPlot.xBottom, len(rezVI))
+    self.ui.qwtGraphPlot.setAxisMaxMinor(Qwt.QwtPlot.xBottom, 0)
+    self.ui.qwtGraphPlot.setAxisLabelRotation(Qwt.Qwt.QwtPlot.xBottom, -90.0)
+    self.ui.qwtGraphPlot.setAxisLabelAlignment(Qwt.Qwt.QwtPlot.xBottom, Qt.Qt.AlignLeft)
+    self.ui.qwtGraphPlot.setAxisScale(Qwt.Qwt.QwtPlot.yLeft, 0, maxVI, 0.5)
+    # График ВИ
+    curve = Qwt.QwtPlotCurve(u'ВИ')
+    curve.attach(self.ui.qwtGraphPlot)
+    curve.setPen(Qt.QPen(Qt.Qt.black, 20))
+    curve.setData(range(len(rezVI)), rezVI)
+    curve.setStyle(Qwt.Qwt.QwtPlotCurve.Sticks)
+    # markers (горизонтальные разделители)
+    # Максимум нормы
+    self.ui.m1 = m1 = Qwt.Qwt.QwtPlotMarker()
+    m1.setValue(0.0, 2.5)
+    m1.setLineStyle(Qwt.Qwt.QwtPlotMarker.HLine)
+    m1.setLinePen(Qt.QPen(Qt.Qt.red))
+    m1.attach(self.ui.qwtGraphPlot)
+    # Минимум нормы
+    self.ui.m2 = m2 = Qwt.Qwt.QwtPlotMarker()
+    m2.setValue(0.0, 0.5)
+    m2.setLineStyle(Qwt.Qwt.QwtPlotMarker.HLine)
+    m2.setLinePen(Qt.QPen(Qt.Qt.blue))
+    m2.attach(self.ui.qwtGraphPlot)
+    # Среднее
+    self.ui.m3 = m3 = Qwt.Qwt.QwtPlotMarker()
+    m3.setValue(0.0, mean)
+    m3.setLineStyle(Qwt.Qwt.QwtPlotMarker.HLine)
+    m3.setLinePen(Qt.QPen(Qt.Qt.green))
+    m3.attach(self.ui.qwtGraphPlot)
+    # Выводим график
+    self.ui.qwtGraphPlot.replot()
 
-  def plotVegetIndex(self):
-    pass
+  def plotSegment(self):
+    """
+    Построение по сегментам
+    """
+    funcLabel = [ '1', '2', '3<p>F1', '4', '5',
+                  '1', '2', '3<p>F2', '4', '5',
+                  '1', '2', '3<p>F3', '4', '5',
+                  '1', '2', '3<p>F4', '4', '5',
+                  '1', '2', '3<p>F5', '4', '5',
+                  '1', '2', '3<p>F6', '4', '5',
+                  '1', '2', '3<p>F7', '4', '5', ]
+    segLabel = ['C1', 'C2-3', 'C4-5', 'C6', 'C7-8',
+              'Th1', 'Th2', 'Th3-4', 'Th5', 'Th6',
+              'Th7', 'Th8-9', 'Th10', 'Th11', 'Th12',
+              'L1', 'L2', 'L3', 'L4', 'L5',
+              'S1', 'S2', 'S3-4', 'K-S5']
+    cols = {'C1':Qt.Qt.black, 'C2-3':Qt.Qt.red, 'C4-5':Qt.Qt.blue,
+            'C6':Qt.Qt.black, 'C7-8':Qt.Qt.red, 'Th1':Qt.Qt.blue,
+            'Th2':Qt.Qt.black, 'Th3-4':Qt.Qt.red, 'Th5':Qt.Qt.blue,
+            'Th6':Qt.Qt.black, 'Th7':Qt.Qt.red, 'Th8-9':Qt.Qt.blue,
+            'Th10':Qt.Qt.black, 'Th11':Qt.Qt.red, 'Th12':Qt.Qt.blue,
+            'L1':Qt.Qt.black, 'L2':Qt.Qt.red, 'L3':Qt.Qt.blue,
+            'L4':Qt.Qt.black, 'L5':Qt.Qt.red, 'S1':Qt.Qt.blue,
+            'S2':Qt.Qt.black, 'S3-4':Qt.Qt.red, 'K-S5':Qt.Qt.blue}
+
+    # Если выделена не однастрока (4 поля)
+    if len(self.ui.treExportProbes.selectedIndexes()) != 4:
+      return
+
+    # Очищаем поле вывода графика
+    self.ui.qwtSegPlot.clear()
+    # Присваиваем графику название
+    self.ui.qwtSegPlot.setTitle(u'Сегмент')
+    self.ui.qwtSegPlot.setCanvasBackground(Qt.Qt.white)
+    # grid
+    self.ui.grid = Qwt.Qwt.QwtPlotGrid()
+    self.ui.pen = Qt.QPen(Qt.Qt.DotLine)
+    self.ui.pen.setColor(Qt.Qt.black)
+    self.ui.pen.setWidth(1)
+    self.ui.grid.setPen(self.ui.pen)
+    self.ui.grid.attach(self.ui.qwtSegPlot)
+    # markers (Вертикальны разделители)
+    self.ui.m1 = m1 = Qwt.Qwt.QwtPlotMarker()
+    m1.setValue(4.0, 0.0)
+    m1.setLineStyle(Qwt.Qwt.QwtPlotMarker.VLine)
+    m1.setLinePen(Qt.QPen(Qt.Qt.black))
+    m1.attach(self.ui.qwtSegPlot)
+    self.ui.m2 = m2 = Qwt.Qwt.QwtPlotMarker()
+    m2.setValue(9.0, 0.0)
+    m2.setLineStyle(Qwt.Qwt.QwtPlotMarker.VLine)
+    m2.setLinePen(Qt.QPen(Qt.Qt.black))
+    m2.attach(self.ui.qwtSegPlot)
+    self.ui.m3 = m3 = Qwt.Qwt.QwtPlotMarker()
+    m3.setValue(14.0, 0.0)
+    m3.setLineStyle(Qwt.Qwt.QwtPlotMarker.VLine)
+    m3.setLinePen(Qt.QPen(Qt.Qt.black))
+    m3.attach(self.ui.qwtSegPlot)
+    self.ui.m4 = m4 = Qwt.Qwt.QwtPlotMarker()
+    m4.setValue(19.0, 0.0)
+    m4.setLineStyle(Qwt.Qwt.QwtPlotMarker.VLine)
+    m4.setLinePen(Qt.QPen(Qt.Qt.black))
+    m4.attach(self.ui.qwtSegPlot)
+    self.ui.m5 = m5 = Qwt.Qwt.QwtPlotMarker()
+    m5.setValue(24.0, 0.0)
+    m5.setLineStyle(Qwt.Qwt.QwtPlotMarker.VLine)
+    m5.setLinePen(Qt.QPen(Qt.Qt.black))
+    m5.attach(self.ui.qwtSegPlot)
+    self.ui.m6 = m6 = Qwt.Qwt.QwtPlotMarker()
+    m6.setValue(29.0, 0.0)
+    m6.setLineStyle(Qwt.Qwt.QwtPlotMarker.VLine)
+    m6.setLinePen(Qt.QPen(Qt.Qt.black))
+    m6.attach(self.ui.qwtSegPlot)
+    # legend
+    legend = Qwt.QwtLegend()
+    legend.setFrameStyle(Qt.QFrame.Box)
+    legend.setItemMode(Qwt.Qwt.QwtLegend.CheckableItem)
+    self.ui.qwtSegPlot.insertLegend(legend, Qwt.QwtPlot.RightLegend)
+    # Axis
+    self.ui.qwtSegPlot.setAxisScaleDraw(
+      Qwt.QwtPlot.xBottom, TextScaleDraw(funcLabel))
+    self.ui.qwtSegPlot.setAxisMaxMajor(Qwt.QwtPlot.xBottom, 35)
+    self.ui.qwtSegPlot.setAxisMaxMinor(Qwt.QwtPlot.xBottom, 0)
+    # Расчёт значений
+    for index in self.ui.treExportProbes.selectedItems():
+      # Получаем матрицы съема
+      lMatr, rMatr = base.getMatrix(index.text(0), str(index.text(2)))
+    # Получаем словарь сегментов для каждого полушария
+    lSeg = MathFunc.Segment(lMatr)
+    rSeg = MathFunc.Segment(rMatr)
+    # Создаём словари curve
+    curvL = {}
+    curvR = {}
+    # Строим графики по сементам
+    for key in lSeg.keys():
+      # Левое полушарие
+      curvL[key] = Qwt.QwtPlotCurve(key)
+      curvL[key].attach(self.ui.qwtSegPlot)
+      curvL[key].setRenderHint(Qwt.QwtPlotItem.RenderAntialiased)
+      curvL[key].setPen(Qt.QPen(cols[key], 2, Qt.Qt.DotLine))
+      curvL[key].setData(range(len(lSeg[key])), lSeg[key])
+      self.showCurve(curvL[key], False)
+      # Правое полушарие
+      curvR[key] = Qwt.QwtPlotCurve(key)
+      curvR[key].attach(self.ui.qwtSegPlot)
+      curvR[key].setRenderHint(Qwt.QwtPlotItem.RenderAntialiased)
+      curvR[key].setPen(Qt.QPen(cols[key], 2))
+      curvR[key].setData(range(len(rSeg[key])), rSeg[key])
+      self.showCurve(curvR[key], False)
+    # Выводим график
+    self.showCurve(curvL['C1'], True)
+    self.showCurve(curvR['C1'], True)
+    self.ui.qwtSegPlot.replot()
+  # plotSegment()
 
   def helpAbout(self):
     '''
@@ -403,6 +750,7 @@ def main():
   window = Main()
   window.show()
   sys.exit(app.exec_())
+  # main()
 
 if __name__ == '__main__':
   main()

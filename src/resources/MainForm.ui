@@ -222,8 +222,11 @@
            <property name="alternatingRowColors">
             <bool>true</bool>
            </property>
+           <property name="selectionMode">
+            <enum>QAbstractItemView::SingleSelection</enum>
+           </property>
            <property name="rootIsDecorated">
-            <bool>false</bool>
+            <bool>true</bool>
            </property>
            <property name="uniformRowHeights">
             <bool>true</bool>
@@ -268,6 +271,9 @@
              <widget class="QTreeWidget" name="treExportProbes">
               <property name="alternatingRowColors">
                <bool>true</bool>
+              </property>
+              <property name="selectionMode">
+               <enum>QAbstractItemView::ExtendedSelection</enum>
               </property>
               <property name="rootIsDecorated">
                <bool>false</bool>
@@ -358,12 +364,21 @@
                <attribute name="title">
                 <string>Сегмент</string>
                </attribute>
-               <layout class="QHBoxLayout" name="horizontalLayout_3"/>
+               <layout class="QHBoxLayout" name="horizontalLayout_3">
+                <item>
+                 <widget class="QwtPlot" name="qwtSegPlot"/>
+                </item>
+               </layout>
               </widget>
               <widget class="QWidget" name="tabFunction">
                <attribute name="title">
                 <string>Функция</string>
                </attribute>
+               <layout class="QHBoxLayout" name="horizontalLayout_6">
+                <item>
+                 <widget class="QwtPlot" name="qwtFuncPlot"/>
+                </item>
+               </layout>
               </widget>
               <widget class="QWidget" name="tab">
                <attribute name="title">
@@ -424,7 +439,7 @@
      <x>0</x>
      <y>0</y>
      <width>770</width>
-     <height>20</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu">
