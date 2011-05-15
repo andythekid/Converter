@@ -5,6 +5,7 @@ import sys
 from PyQt4 import QtGui, QtCore
 import PyQt4.Qt as Qt
 import PyQt4.Qwt5 as Qwt #@UnresolvedImport
+import GraphFunc as gf
 # Главное окно
 from MainForm import Ui_MainWindow
 # Класс доступа к обрабатываемой БД
@@ -19,29 +20,6 @@ import platform
 import os
 
 __version__ = "0.1.5"
-
-class TextScaleDraw(Qwt.QwtScaleDraw):
-  """
-  Класс для отрисовки Axis-a Qwt, переданного в форме строки
-  """
-  def __init__(self, labelStrings, *args):
-    """
-    Initialize text scale draw with label strings and any other arguments that
-    """
-    Qwt.QwtScaleDraw.__init__(self, *args)
-    self.labelStrings = labelStrings
-  # __init__()
-
-  def label(self, value):
-    """
-    Apply the label at location 'value' .  Since this class is to be used for BarPlots
-    or LinePlots, every item in 'value' should be an integer.
-    """
-    label = Qt.QString(self.labelStrings[int(value)])
-    return Qwt.QwtText(label)
-  # label()
-
-# TEXTSCALE DRAW END
 
 class Main(QtGui.QMainWindow):
   def __init__(self):
@@ -87,12 +65,14 @@ class Main(QtGui.QMainWindow):
     self.ui.qwtSegPlot.legendChecked.connect(self.showCurve)
     # Построение графика MaxMin
     self.ui.actMaxMin.triggered.connect(self.plotMaxMin)
+    # Построение графика корреляции по сегментам
+    self.ui.actCorrelationFi.triggered.connect(self.plotCorrelationFi)
     # Постоение графика вегетативного индекса
     self.ui.actVI.triggered.connect(self.plotVegetIndex)
     # Разворачиваем на весь экран
     self.showMaximized()
     self.graphTab = 'graph'
-    self.groupVI = False
+    self.groupVI = True
     self.statusBar().showMessage(u'Готов')
 
   def openDB(self):
@@ -318,7 +298,6 @@ class Main(QtGui.QMainWindow):
     elif self.graphTab == 'graph':
       plot = self.ui.qwtGraphPlot
 #    elif self.graphTab == 'matr':
-    # Вставить проверку открытой вкладки
     # Получаем имя изображения в системной кодировке
     filename = QtGui.QFileDialog.getSaveFileName(self,
                                                  u'Выберете файл изображения',
@@ -372,6 +351,8 @@ class Main(QtGui.QMainWindow):
       plot = self.ui.qwtSegPlot
     elif self.graphTab == 'func':
       plot = self.ui.qwtFuncPlot
+    elif self.graphTab == 'graph':
+      plot = self.ui.qwtGraphPlot
     else:
       return
     item.setVisible(on)
@@ -391,18 +372,11 @@ class Main(QtGui.QMainWindow):
     self.patLst = pr.ExportProbes()
     # clearExport()
 
+
   def plotMaxMin(self):
     '''
     Постоение графика Max-min
     '''
-    funcLabel = [ '1', '2', '3<p>F1', '4', '5',
-                  '1', '2', '3<p>F2', '4', '5',
-                  '1', '2', '3<p>F3', '4', '5',
-                  '1', '2', '3<p>F4', '4', '5',
-                  '1', '2', '3<p>F5', '4', '5',
-                  '1', '2', '3<p>F6', '4', '5',
-                  '1', '2', '3<p>F7', '4', '5', ]
-
     # Если выделена не однастрока (4 поля)
     if len(self.ui.treExportProbes.selectedIndexes()) != 4:
       self.statusBar().showMessage(u'Пациент не выбран')
@@ -413,59 +387,11 @@ class Main(QtGui.QMainWindow):
     # Расчитываем MaxMin для каждого полушария
     lMaxMin = MathFunc.MaxMin(lMatr)
     rMaxMin = MathFunc.MaxMin(rMatr)
-    # Очищаем поле вывода графика
-    self.ui.qwtGraphPlot.clear()
-    # Присваиваем графику название
-    self.ui.qwtGraphPlot.setTitle(u'Max-Min')
-    self.ui.qwtGraphPlot.setCanvasBackground(Qt.Qt.white)
-    # grid
-    self.ui.grid = Qwt.Qwt.QwtPlotGrid()
-    self.ui.pen = Qt.QPen(Qt.Qt.DotLine)
-    self.ui.pen.setColor(Qt.Qt.black)
-    self.ui.pen.setWidth(1)
-    self.ui.grid.setPen(self.ui.pen)
-    self.ui.grid.attach(self.ui.qwtGraphPlot)
+    # подготавливаем холст
+    gf.preparePlot(self.ui.qwtGraphPlot, u'Max-Min')
+    gf.setAxis(self.ui.qwtGraphPlot)
     # markers (Вертикальны разделители)
-    self.ui.m1 = m1 = Qwt.Qwt.QwtPlotMarker()
-    m1.setValue(4.0, 0.0)
-    m1.setLineStyle(Qwt.Qwt.QwtPlotMarker.VLine)
-    m1.setLinePen(Qt.QPen(Qt.Qt.black))
-    m1.attach(self.ui.qwtGraphPlot)
-    self.ui.m2 = m2 = Qwt.Qwt.QwtPlotMarker()
-    m2.setValue(9.0, 0.0)
-    m2.setLineStyle(Qwt.Qwt.QwtPlotMarker.VLine)
-    m2.setLinePen(Qt.QPen(Qt.Qt.black))
-    m2.attach(self.ui.qwtGraphPlot)
-    self.ui.m3 = m3 = Qwt.Qwt.QwtPlotMarker()
-    m3.setValue(14.0, 0.0)
-    m3.setLineStyle(Qwt.Qwt.QwtPlotMarker.VLine)
-    m3.setLinePen(Qt.QPen(Qt.Qt.black))
-    m3.attach(self.ui.qwtGraphPlot)
-    self.ui.m4 = m4 = Qwt.Qwt.QwtPlotMarker()
-    m4.setValue(19.0, 0.0)
-    m4.setLineStyle(Qwt.Qwt.QwtPlotMarker.VLine)
-    m4.setLinePen(Qt.QPen(Qt.Qt.black))
-    m4.attach(self.ui.qwtGraphPlot)
-    self.ui.m5 = m5 = Qwt.Qwt.QwtPlotMarker()
-    m5.setValue(24.0, 0.0)
-    m5.setLineStyle(Qwt.Qwt.QwtPlotMarker.VLine)
-    m5.setLinePen(Qt.QPen(Qt.Qt.black))
-    m5.attach(self.ui.qwtGraphPlot)
-    self.ui.m6 = m6 = Qwt.Qwt.QwtPlotMarker()
-    m6.setValue(29.0, 0.0)
-    m6.setLineStyle(Qwt.Qwt.QwtPlotMarker.VLine)
-    m6.setLinePen(Qt.QPen(Qt.Qt.black))
-    m6.attach(self.ui.qwtGraphPlot)
-    # legend
-    legend = Qwt.QwtLegend()
-    legend.setFrameStyle(Qt.QFrame.Box)
-    self.ui.qwtGraphPlot.insertLegend(legend, Qwt.QwtPlot.BottomLegend)
-    # Axis
-    self.ui.qwtGraphPlot.setAxisScaleDraw(
-      Qwt.QwtPlot.xBottom, TextScaleDraw(funcLabel))
-    self.ui.qwtGraphPlot.setAxisMaxMajor(Qwt.QwtPlot.xBottom, 35)
-    self.ui.qwtGraphPlot.setAxisMaxMinor(Qwt.QwtPlot.xBottom, 0)
-    self.ui.qwtGraphPlot.setAxisAutoScale(Qwt.Qwt.QwtPlot.yLeft)
+    gf.plotVFuncMarkers(self.ui.qwtGraphPlot)
     # Построение графика левого полушария
     curve = Qwt.QwtPlotCurve(u'Левое полушарие')
     curve.attach(self.ui.qwtGraphPlot)
@@ -481,6 +407,36 @@ class Main(QtGui.QMainWindow):
     # Выводим график
     self.ui.qwtGraphPlot.replot()
     # plotMaxMin()
+
+  def plotCorrelationFi(self):
+    """
+    Построение графика корреляции левого и правого полушария по сегментам
+    """
+    # Если выделена не однастрока (4 поля)
+    if len(self.ui.treExportProbes.selectedIndexes()) != 4:
+      self.statusBar().showMessage(u'Пациент не выбран')
+      return
+    for index in self.ui.treExportProbes.selectedItems():
+      # Получаем матрицы съема
+      lMatr, rMatr = base.getMatrix(index.text(0), str(index.text(2)))
+    # Получаем матрицу корреляции
+    corrMtrx = MathFunc.CorrelationSegI(lMatr, rMatr)
+    # подготавливаем холст
+    gf.preparePlot(self.ui.qwtGraphPlot, u'Корреляция Seg(L,R)')
+    gf.setAxis(self.ui.qwtGraphPlot)
+    # markers (Вертикальны разделители)
+    gf.plotVFuncMarkers(self.ui.qwtGraphPlot)
+    # ось абцисс
+    gf.plotAbciss(self.ui.qwtGraphPlot)
+    # Построение графика правого полушария
+    curve = Qwt.QwtPlotCurve(u'Корреляция Seg(L,R)')
+    curve.attach(self.ui.qwtGraphPlot)
+    curve.setRenderHint(Qwt.QwtPlotItem.RenderAntialiased)
+    curve.setPen(Qt.QPen(Qt.Qt.black, 2))
+    curve.setData(range(0, 35), corrMtrx)
+    # Выводим график
+    self.ui.qwtGraphPlot.replot()
+
 
   def plotVegetIndex(self):
     """
@@ -566,52 +522,17 @@ class Main(QtGui.QMainWindow):
       maxVI = 2.5
     maxVI = maxVI + maxVI * 0.2
     # Построение графика ВИ
-    # Очищаем поле вывода графика
-    self.ui.qwtGraphPlot.clear()
-    # Присваиваем графику название
-    self.ui.qwtGraphPlot.setTitle(u'Вегетативный индекс')
-    self.ui.qwtGraphPlot.setCanvasBackground(Qt.Qt.white)
-    # grid
-    self.ui.grid = Qwt.Qwt.QwtPlotGrid()
-    self.ui.pen = Qt.QPen(Qt.Qt.DotLine)
-    self.ui.pen.setColor(Qt.Qt.black)
-    self.ui.pen.setWidth(1)
-    self.ui.grid.setPen(self.ui.pen)
-    self.ui.grid.attach(self.ui.qwtGraphPlot)
-    # Legend
-    # Axis
-    self.ui.qwtGraphPlot.setAxisScaleDraw(
-      Qwt.QwtPlot.xBottom, TextScaleDraw(rezDat))
-    self.ui.qwtGraphPlot.setAxisMaxMajor(Qwt.QwtPlot.xBottom, len(rezVI))
-    self.ui.qwtGraphPlot.setAxisMaxMinor(Qwt.QwtPlot.xBottom, 0)
-    self.ui.qwtGraphPlot.setAxisLabelRotation(Qwt.Qwt.QwtPlot.xBottom, -90.0)
-    self.ui.qwtGraphPlot.setAxisLabelAlignment(Qwt.Qwt.QwtPlot.xBottom, Qt.Qt.AlignLeft)
-    self.ui.qwtGraphPlot.setAxisScale(Qwt.Qwt.QwtPlot.yLeft, 0, maxVI, 0.5)
+    # подготавливаем холст
+    gf.preparePlot(self.ui.qwtGraphPlot, u'Вегетативный индекс', leg = 'no')
+    gf.setAxis(self.ui.qwtGraphPlot, 'index', rezDat, rezVI, maxVI)
     # График ВИ
     curve = Qwt.QwtPlotCurve(u'ВИ')
     curve.attach(self.ui.qwtGraphPlot)
     curve.setPen(Qt.QPen(Qt.Qt.black, 20))
     curve.setData(range(len(rezVI)), rezVI)
     curve.setStyle(Qwt.Qwt.QwtPlotCurve.Sticks)
-    # markers (горизонтальные разделители)
-    # Максимум нормы
-    self.ui.m1 = m1 = Qwt.Qwt.QwtPlotMarker()
-    m1.setValue(0.0, 2.5)
-    m1.setLineStyle(Qwt.Qwt.QwtPlotMarker.HLine)
-    m1.setLinePen(Qt.QPen(Qt.Qt.red))
-    m1.attach(self.ui.qwtGraphPlot)
-    # Минимум нормы
-    self.ui.m2 = m2 = Qwt.Qwt.QwtPlotMarker()
-    m2.setValue(0.0, 0.5)
-    m2.setLineStyle(Qwt.Qwt.QwtPlotMarker.HLine)
-    m2.setLinePen(Qt.QPen(Qt.Qt.blue))
-    m2.attach(self.ui.qwtGraphPlot)
-    # Среднее
-    self.ui.m3 = m3 = Qwt.Qwt.QwtPlotMarker()
-    m3.setValue(0.0, mean)
-    m3.setLineStyle(Qwt.Qwt.QwtPlotMarker.HLine)
-    m3.setLinePen(Qt.QPen(Qt.Qt.green))
-    m3.attach(self.ui.qwtGraphPlot)
+    # Построение границ нормы
+    gf.plotNormBorders(self.ui.qwtGraphPlot, 2.5, 0.5, mean)
     # Выводим график
     self.ui.qwtGraphPlot.replot()
 
@@ -619,18 +540,6 @@ class Main(QtGui.QMainWindow):
     """
     Построение по сегментам
     """
-    funcLabel = [ '1', '2', '3<p>F1', '4', '5',
-                  '1', '2', '3<p>F2', '4', '5',
-                  '1', '2', '3<p>F3', '4', '5',
-                  '1', '2', '3<p>F4', '4', '5',
-                  '1', '2', '3<p>F5', '4', '5',
-                  '1', '2', '3<p>F6', '4', '5',
-                  '1', '2', '3<p>F7', '4', '5', ]
-    segLabel = ['C1', 'C2-3', 'C4-5', 'C6', 'C7-8',
-              'Th1', 'Th2', 'Th3-4', 'Th5', 'Th6',
-              'Th7', 'Th8-9', 'Th10', 'Th11', 'Th12',
-              'L1', 'L2', 'L3', 'L4', 'L5',
-              'S1', 'S2', 'S3-4', 'K-S5']
     cols = {'C1':Qt.Qt.black, 'C2-3':Qt.Qt.red, 'C4-5':Qt.Qt.blue,
             'C6':Qt.Qt.black, 'C7-8':Qt.Qt.red, 'Th1':Qt.Qt.blue,
             'Th2':Qt.Qt.black, 'Th3-4':Qt.Qt.red, 'Th5':Qt.Qt.blue,
@@ -643,60 +552,11 @@ class Main(QtGui.QMainWindow):
     # Если выделена не однастрока (4 поля)
     if len(self.ui.treExportProbes.selectedIndexes()) != 4:
       return
-
-    # Очищаем поле вывода графика
-    self.ui.qwtSegPlot.clear()
-    # Присваиваем графику название
-    self.ui.qwtSegPlot.setTitle(u'Сегмент')
-    self.ui.qwtSegPlot.setCanvasBackground(Qt.Qt.white)
-    # grid
-    self.ui.grid = Qwt.Qwt.QwtPlotGrid()
-    self.ui.pen = Qt.QPen(Qt.Qt.DotLine)
-    self.ui.pen.setColor(Qt.Qt.black)
-    self.ui.pen.setWidth(1)
-    self.ui.grid.setPen(self.ui.pen)
-    self.ui.grid.attach(self.ui.qwtSegPlot)
+    # подготавливаем холст
+    gf.preparePlot(self.ui.qwtSegPlot, u'Сегмент', leg = 'check')
+    gf.setAxis(self.ui.qwtSegPlot)
     # markers (Вертикальны разделители)
-    self.ui.m1 = m1 = Qwt.Qwt.QwtPlotMarker()
-    m1.setValue(4.0, 0.0)
-    m1.setLineStyle(Qwt.Qwt.QwtPlotMarker.VLine)
-    m1.setLinePen(Qt.QPen(Qt.Qt.black))
-    m1.attach(self.ui.qwtSegPlot)
-    self.ui.m2 = m2 = Qwt.Qwt.QwtPlotMarker()
-    m2.setValue(9.0, 0.0)
-    m2.setLineStyle(Qwt.Qwt.QwtPlotMarker.VLine)
-    m2.setLinePen(Qt.QPen(Qt.Qt.black))
-    m2.attach(self.ui.qwtSegPlot)
-    self.ui.m3 = m3 = Qwt.Qwt.QwtPlotMarker()
-    m3.setValue(14.0, 0.0)
-    m3.setLineStyle(Qwt.Qwt.QwtPlotMarker.VLine)
-    m3.setLinePen(Qt.QPen(Qt.Qt.black))
-    m3.attach(self.ui.qwtSegPlot)
-    self.ui.m4 = m4 = Qwt.Qwt.QwtPlotMarker()
-    m4.setValue(19.0, 0.0)
-    m4.setLineStyle(Qwt.Qwt.QwtPlotMarker.VLine)
-    m4.setLinePen(Qt.QPen(Qt.Qt.black))
-    m4.attach(self.ui.qwtSegPlot)
-    self.ui.m5 = m5 = Qwt.Qwt.QwtPlotMarker()
-    m5.setValue(24.0, 0.0)
-    m5.setLineStyle(Qwt.Qwt.QwtPlotMarker.VLine)
-    m5.setLinePen(Qt.QPen(Qt.Qt.black))
-    m5.attach(self.ui.qwtSegPlot)
-    self.ui.m6 = m6 = Qwt.Qwt.QwtPlotMarker()
-    m6.setValue(29.0, 0.0)
-    m6.setLineStyle(Qwt.Qwt.QwtPlotMarker.VLine)
-    m6.setLinePen(Qt.QPen(Qt.Qt.black))
-    m6.attach(self.ui.qwtSegPlot)
-    # legend
-    legend = Qwt.QwtLegend()
-    legend.setFrameStyle(Qt.QFrame.Box)
-    legend.setItemMode(Qwt.Qwt.QwtLegend.CheckableItem)
-    self.ui.qwtSegPlot.insertLegend(legend, Qwt.QwtPlot.RightLegend)
-    # Axis
-    self.ui.qwtSegPlot.setAxisScaleDraw(
-      Qwt.QwtPlot.xBottom, TextScaleDraw(funcLabel))
-    self.ui.qwtSegPlot.setAxisMaxMajor(Qwt.QwtPlot.xBottom, 35)
-    self.ui.qwtSegPlot.setAxisMaxMinor(Qwt.QwtPlot.xBottom, 0)
+    gf.plotVFuncMarkers(self.ui.qwtSegPlot)
     # Расчёт значений
     for index in self.ui.treExportProbes.selectedItems():
       # Получаем матрицы съема
